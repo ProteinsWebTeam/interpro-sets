@@ -21,7 +21,11 @@ def parse_clans(filepath, entries):
 
 
 def run(uri, hmm_db=None, clans_tsv=None, processes=1,
-        tmpdir=gettempdir(), remove=True, chunk_size=100000):
+        tmpdir=None, keep_files=False, chunk_size=100000):
+    
+    if tmpdir is None:
+        keep_files = False
+        tmpdir = gettempdir()
 
     if hmm_db is None:
         rm_hmm_db = True
@@ -175,7 +179,7 @@ def run(uri, hmm_db=None, clans_tsv=None, processes=1,
     if rm_clans_tsv:
         os.remove(clans_tsv)
 
-    if remove:
+    if not keep_files:
         utils.logger("remove files")
         for f in files:
             os.remove(f)
