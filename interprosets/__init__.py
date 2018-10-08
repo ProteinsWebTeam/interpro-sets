@@ -22,11 +22,11 @@ def cli():
         "help": "number of processes (default: 1)",
         "type": int,
         "default": 1,
-        "dest" "processes"
+        "dest": "processes"
     }
     rm_arg = {
         "help": "keep generated files (default: false)",
-        "dest" "remove",
+        "dest": "remove",
         "action": "store_false"
     }
 
