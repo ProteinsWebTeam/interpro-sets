@@ -20,7 +20,7 @@ def parse_clans(filepath, entries):
             entries[fam_id]["parent"] = clan_id
 
 
-def run(uri, dbcode, hmm_db=None, clans_tsv=None, processes=1,
+def run(uri, hmm_db=None, clans_tsv=None, processes=1,
         tmpdir=gettempdir(), remove=True, chunk_size=100000):
 
     if hmm_db is None:
@@ -97,9 +97,7 @@ def run(uri, dbcode, hmm_db=None, clans_tsv=None, processes=1,
         e = entries[acc]
         data1.append((
             acc,
-            e["name"],
             e.get("parent"),
-            dbcode,
             sequence
         ))
 
@@ -107,7 +105,7 @@ def run(uri, dbcode, hmm_db=None, clans_tsv=None, processes=1,
             cur.executemany(
                 """
                 INSERT INTO INTERPRO.METHOD_SET
-                VALUES (:1, :2, :3, :4, :5)
+                VALUES (:1, :2, :3)
                 """,
                 data1
             )
@@ -152,7 +150,7 @@ def run(uri, dbcode, hmm_db=None, clans_tsv=None, processes=1,
         cur.executemany(
             """
             INSERT INTO INTERPRO.SET_MEMBER
-            VALUES (:1, :2, :3, :4, :5)
+            VALUES (:1, :2, :3, :4)
             """,
             data1
         )
