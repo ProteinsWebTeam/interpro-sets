@@ -8,11 +8,9 @@ import sys
 from datetime import datetime
 from multiprocessing import Pool
 from subprocess import Popen, PIPE, DEVNULL
+from urllib.request import urlopen
 
-try:
-    import cx_Oracle
-except ImportError:
-    cx_Oracle = None
+import cx_Oracle
 
 
 def logger(msg):
@@ -26,6 +24,16 @@ def connect(uri):
     # Format: user/password@host[:port/schema]
     con = cx_Oracle.connect(uri)
     return con, con.cursor()
+
+
+def download(url, dst):
+    with urlopen(url) as res, open(dst, "wb") as fh:
+        while True:
+            data = res.read(1024)
+            if data:
+                fh.write(data)
+            else:
+                break
 
 
 def parse_hmm(filepath, keep_hmm=True):
@@ -62,6 +70,12 @@ def parse_hmm(filepath, keep_hmm=True):
         logger("WARNING: {} duplicated entries".format(len(duplicates)))
 
     return entries
+
+
+def extract(src, dst):
+    with open(dst, "wt") as fh:
+        for line in iterlines(src):
+            fh.write(line)
 
 
 def iterlines(filepath):

@@ -7,6 +7,9 @@ from tempfile import gettempdir, mkstemp
 
 from . import utils
 
+HMM = "ftp://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam-A.hmm.gz"
+CLANS = "ftp://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam-A.clans.tsv.gz"
+
 
 def parse_clans(filepath, entries):
     for line in utils.iterlines(filepath):
@@ -17,13 +20,43 @@ def parse_clans(filepath, entries):
             entries[fam_id]["parent"] = clan_id
 
 
-def run(uri, hmm_db, clan_tsv, dbcode, processes=1, tmpdir=gettempdir(),
-        remove=True, chunk_size=100000):
+def run(uri, dbcode, hmm_db=None, clans_tsv=None, processes=1,
+        tmpdir=gettempdir(), remove=True, chunk_size=100000):
+
+    if hmm_db is None:
+        rm_hmm_db = True
+        fd, hmm_db = mkstemp(suffix=os.path.basename(HMM), dir=tmpdir)
+        os.close(fd)
+
+        utils.download(HMM, hmm_db)
+    else:
+        rm_hmm_db = False
+
+    if hmm_db.endswith(".gz"):
+        fd, _hmm_db = mkstemp(dir=tmpdir)
+        os.close(fd)
+
+        utils.extract(hmm_db, _hmm_db)
+        if rm_hmm_db:
+            os.remove(hmm_db)
+
+        hmm_db = _hmm_db
+        rm_hmm_db = True
+
     utils.logger("parse HMMs")
     entries = utils.parse_hmm(hmm_db, keep_hmm=True)
 
+    if clans_tsv is None:
+        rm_clans_tsv = True
+        fd, clans_tsv = mkstemp(suffix=os.path.basename(CLANS), dir=tmpdir)
+        os.close(fd)
+
+        utils.download(CLANS, clans_tsv)
+    else:
+        rm_clans_tsv = False
+
     utils.logger("parse clans")
-    parse_clans(clan_tsv, entries)
+    parse_clans(clans_tsv, entries)
 
     utils.logger("run hmmemit")
     jobs = []
@@ -137,6 +170,12 @@ def run(uri, hmm_db, clan_tsv, dbcode, processes=1, tmpdir=gettempdir(),
     cur.close()
     con.commit()
     con.close()
+
+    if rm_hmm_db:
+        os.remove(hmm_db)
+
+    if rm_clans_tsv:
+        os.remove(clans_tsv)
 
     if remove:
         utils.logger("remove files")
