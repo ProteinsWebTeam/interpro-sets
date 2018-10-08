@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 
-def main():
+def cli():
     import argparse
-    import utils
+    from . import utils
 
     parser = argparse.ArgumentParser(
         description="Sets/Collections in InterPro"
@@ -66,9 +66,3 @@ def main():
         pass
     elif args.command == "pirsf":
         pass
-
-
-if __name__ == '__main__':
-    main()
-
-
