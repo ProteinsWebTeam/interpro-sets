@@ -4,7 +4,7 @@
 
 def cli():
     import argparse
-    from . import utils
+    from . import pfam, utils
 
     parser = argparse.ArgumentParser(
         description="Sets/Collections in InterPro"
@@ -21,7 +21,13 @@ def cli():
     proc_arg = {
         "help": "number of processes (default: 1)",
         "type": int,
-        "default": 1
+        "default": 1,
+        "dest" "processes"
+    }
+    rm_arg = {
+        "help": "keep generated files (default: false)",
+        "dest" "remove",
+        "action": "store_false"
     }
 
     parser.add_argument("--dir",
@@ -48,6 +54,9 @@ def cli():
     _parser.add_argument("--uri", **uri_arg)
     _parser.add_argument("--dir", **dir_arg)
     _parser.add_argument("-p", **proc_arg)
+    _parser.add_argument("--hmm", help="Pfam-A HMM file")
+    _parser.add_argument("--clans", help="Pfam clans TSV file")
+    _parser.add_argument("--keep-files", **rm_arg)
 
     _parser = subparsers.add_parser("pirsf", help="")
     _parser.add_argument("--uri", **uri_arg)
@@ -63,6 +72,7 @@ def cli():
     elif args.command == "panther":
         pass
     elif args.command == "pfam":
-        pass
+        pfam.run(args.uri, hmm_db=args.hmm, clans_tsv=args.clans, 
+                 processes=args.processes, tmpdir=args.dir, remove=args.remove)
     elif args.command == "pirsf":
         pass
