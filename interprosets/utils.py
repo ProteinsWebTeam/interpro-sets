@@ -26,6 +26,53 @@ def connect(uri):
     return con, con.cursor()
 
 
+def init_tables(uri):
+    con, cur = connect(uri)
+
+    try:
+        cur.execute("DROP TABLE INTERPRO.METHOD_SET")
+    except:
+        pass
+
+    try:
+        cur.execute("DROP TABLE INTERPRO.METHOD_TARGET")
+    except:
+        pass
+
+    cur.execute(
+        """
+        CREATE TABLE INTERPRO.METHOD_SET
+        (
+            METHOD_AC VARCHAR2(25) NOT NULL PRIMARY KEY,
+            SET_AC VARCHAR2(25),
+            SEQUENCE CLOB NOT NULL,
+            CONSTRAINT FK_METHOD_SET$M
+              FOREIGN KEY (METHOD_AC)
+              REFERENCES INTERPRO.METHOD (METHOD_AC)
+        )
+        """
+    )
+
+    cur.execute(
+        """
+        CREATE TABLE INTERPRO.METHOD_TARGET
+        (
+            METHOD_AC VARCHAR2(25) NOT NULL,
+            TARGET_AC VARCHAR2(25) NOT NULL,
+            EVALUE FLOAT NOT NULL,
+            DOMAINS CLOB NOT NULL,
+            PRIMARY KEY (METHOD_AC, TARGET_AC),
+            CONSTRAINT FK_METHOD_TARGET$M
+              FOREIGN KEY (METHOD_AC)
+              REFERENCES INTERPRO.METHOD (METHOD_AC),
+            CONSTRAINT FK_METHOD_TARGET$T
+              FOREIGN KEY (TARGET_AC)
+              REFERENCES INTERPRO.METHOD (METHOD_AC)
+        )
+        """
+    )
+
+
 def download(url, dst):
     with urlopen(url) as res, open(dst, "wb") as fh:
         while True:
