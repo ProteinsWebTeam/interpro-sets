@@ -220,7 +220,7 @@ def hmmscan(acc, fasta_file, hmm_db):
 
 
 def _hmmscan(args):
-    hmmscan(*args)
+    return hmmscan(*args)
 
 
 def batch_hmmconvert(jobs, processes=1):
