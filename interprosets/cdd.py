@@ -82,7 +82,7 @@ def run(uri, cdd_masters=None, links=None, processes=1,
         os.remove(cdd_masters)
 
     fd, files_list = mkstemp(dir=tmpdir)
-    os.close(files_list)
+    os.close(fd)
 
     dirs = []
     with open(files_list, "wt") as fh:
