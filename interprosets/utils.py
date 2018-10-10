@@ -35,7 +35,7 @@ def compass(fasta_file, profile_db):
     ]
     Popen(cmd, stdout=DEVNULL, stderr=DEVNULL).wait()
 
-    return fasta_file, out_file
+    return out_file
 
 
 def connect(uri):
@@ -106,7 +106,7 @@ def hmmscan(fasta_file, hmm_db):
             stdout=fh, stderr=DEVNULL
         ).wait()
 
-    return fasta_file, out_file, tab_file
+    return out_file, tab_file
 
 
 def init_tables(uri):
@@ -440,7 +440,8 @@ def _batch(func, jobs, processes):
 
 def _compass(args):
     acc, fasta_file, profile_db = args
-    return acc, *compass(fasta_file, profile_db)
+    out_file = compass(fasta_file, profile_db)
+    return acc, fasta_file, out_file
 
 
 def _hmmconvert(args):
@@ -450,7 +451,8 @@ def _hmmconvert(args):
 
 def _hmmscan(args):
     acc, fasta_file, hmm_db = args
-    return acc, *hmmscan(fasta_file, hmm_db)
+    out_file, tab_file = hmmscan(fasta_file, hmm_db)
+    return acc, fasta_file, out_file, tab_file
 
 
 def _parse_block(fh, line):
