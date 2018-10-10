@@ -283,7 +283,7 @@ def _parse_hmmscan_alignments(filepath):
                     query = ""
             elif target:
                 if line:
-                    t, q = parse_block(fh, next(fh).strip())
+                    t, q = parse_block(fh, line)
                     target += t
                     query += q
                 elif n_blank == 2:
