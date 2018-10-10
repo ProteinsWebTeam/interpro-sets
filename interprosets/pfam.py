@@ -21,10 +21,9 @@ def parse_clans(filepath, entries):
 
 
 def run(uri, hmm_db=None, clans_tsv=None, processes=1,
-        tmpdir=None, keep_files=False, chunk_size=100000):
+        tmpdir=None, chunk_size=100000):
     
     if tmpdir is None:
-        keep_files = False
         tmpdir = gettempdir()
 
     if hmm_db is None:
@@ -62,10 +61,12 @@ def run(uri, hmm_db=None, clans_tsv=None, processes=1,
     utils.logger("parse clans")
     parse_clans(clans_tsv, entries)
 
+    if rm_clans_tsv:
+        os.remove(clans_tsv)
+
     utils.logger("run hmmemit")
     jobs = []
     dirs = set()
-    files = set()
     for acc, e in entries.items():
         fd, hmm_file = mkstemp(dir=tmpdir)
         os.close(fd)
@@ -73,11 +74,15 @@ def run(uri, hmm_db=None, clans_tsv=None, processes=1,
         with open(hmm_file, "wt") as fh:
             fh.write(e["hmm"])
 
-        fa_dir = os.path.join(tmpdir, acc[:5])
-        fa_file = os.path.join(fa_dir, acc + ".fa")
+        _dir = os.path.join(tmpdir, acc[:5])
+        try:
+            os.mkdir(_dir)
+        except FileExistsError:
+            pass
 
-        dirs.add(fa_dir)
-        files.add(fa_file)
+        fa_file = os.path.join(_dir, acc + ".fa")
+
+        dirs.add(_dir)
 
         if utils.hmmemit(hmm_file, fa_file):
             jobs.append((acc, fa_file, hmm_db))
@@ -92,9 +97,6 @@ def run(uri, hmm_db=None, clans_tsv=None, processes=1,
     data1 = []
     data2 = []
     for acc, fa_file, out_file, tab_file in utils.batch_hmmscan(jobs, processes):
-        files.add(out_file)
-        files.add(tab_file)
-
         sequence = utils.read_fasta(fa_file)
         targets = utils.parse_hmmscan_results(out_file, tab_file)
 
@@ -146,6 +148,10 @@ def run(uri, hmm_db=None, clans_tsv=None, processes=1,
                 )
                 data2 = []
 
+        os.remove(fa_file)
+        os.remove(out_file)
+        os.remove(tab_file)
+
         cnt += 1
         if not cnt % 1000:
             utils.logger("run hmmscan: {:>10} / {}".format(cnt, len(jobs)))
@@ -176,14 +182,5 @@ def run(uri, hmm_db=None, clans_tsv=None, processes=1,
     if rm_hmm_db:
         os.remove(hmm_db)
 
-    if rm_clans_tsv:
-        os.remove(clans_tsv)
-
-    if not keep_files:
-        utils.logger("remove files")
-        for f in files:
-            os.remove(f)
-
-        for d in dirs:
-            os.rmdir(d)
-
+    for d in dirs:
+        os.rmdir(d)
