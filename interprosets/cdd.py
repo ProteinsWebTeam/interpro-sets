@@ -27,8 +27,7 @@ def parse_superfamilies(filepath):
     return fam2set
 
 
-def run(uri, cdd_masters=None, links=None, processes=1,
-        tmpdir=gettempdir(), chunk_size=100000):
+def run(uri, cdd_masters=None, links=None, processes=1, tmpdir=gettempdir()):
 
     if cdd_masters is None:
         rm_cdd_masters = True
@@ -130,7 +129,7 @@ def run(uri, cdd_masters=None, links=None, processes=1,
             sequence
         ))
 
-        if len(data1) == chunk_size:
+        if len(data1) == utils.INSERT_SIZE:
             cur.executemany(
                 """
                 INSERT INTO INTERPRO.METHOD_SET
@@ -161,7 +160,7 @@ def run(uri, cdd_masters=None, links=None, processes=1,
                 ])
             ))
 
-            if len(data2) == chunk_size:
+            if len(data2) == utils.INSERT_SIZE:
                 cur.executemany(
                     """
                     INSERT INTO INTERPRO.METHOD_TARGET

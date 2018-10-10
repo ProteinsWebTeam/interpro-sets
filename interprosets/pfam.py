@@ -20,9 +20,7 @@ def parse_clans(filepath, entries):
             entries[fam_id]["parent"] = clan_id
 
 
-def run(uri, hmm_db=None, clans_tsv=None, processes=1,
-        tmpdir=gettempdir(), chunk_size=100000):
-
+def run(uri, hmm_db=None, clans_tsv=None, processes=1, tmpdir=gettempdir()):
     if hmm_db is None:
         rm_hmm_db = True
         fd, hmm_db = mkstemp(suffix=os.path.basename(HMM), dir=tmpdir)
@@ -107,7 +105,7 @@ def run(uri, hmm_db=None, clans_tsv=None, processes=1,
             sequence
         ))
 
-        if len(data1) == chunk_size:
+        if len(data1) == utils.INSERT_SIZE:
             cur.executemany(
                 """
                 INSERT INTO INTERPRO.METHOD_SET
@@ -138,7 +136,7 @@ def run(uri, hmm_db=None, clans_tsv=None, processes=1,
                 json.dumps(domains)
             ))
 
-            if len(data2) == chunk_size:
+            if len(data2) == utils.INSERT_SIZE:
                 cur.executemany(
                     """
                     INSERT INTO INTERPRO.METHOD_TARGET

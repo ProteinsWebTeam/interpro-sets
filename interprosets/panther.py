@@ -26,7 +26,7 @@ def find_hmm_files(path):
     return entries
 
 
-def run(uri, books, tmpdir=gettempdir(), processes=1, chunk_size=100000):
+def run(uri, books, tmpdir=gettempdir(), processes=1):
     fd, hmm_db = mkstemp(dir=tmpdir)
     os.close(fd)
 
@@ -96,7 +96,7 @@ def run(uri, books, tmpdir=gettempdir(), processes=1, chunk_size=100000):
             sequence
         ))
 
-        if len(data1) == chunk_size:
+        if len(data1) == utils.INSERT_SIZE:
             cur.executemany(
                 """
                 INSERT INTO INTERPRO.METHOD_SET
@@ -127,7 +127,7 @@ def run(uri, books, tmpdir=gettempdir(), processes=1, chunk_size=100000):
                 json.dumps(domains)
             ))
 
-            if len(data2) == chunk_size:
+            if len(data2) == utils.INSERT_SIZE:
                 cur.executemany(
                     """
                     INSERT INTO INTERPRO.METHOD_TARGET
