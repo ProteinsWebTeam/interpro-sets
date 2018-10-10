@@ -333,7 +333,7 @@ def parse_hmmscan_results(out_file, tab_file):
         cols = re.split(r"\s+", line.rstrip(), maxsplit=22)
 
         # Pfam entries end with a mark followed by a number
-        acc = cols[1].split(".")
+        acc = cols[1].split(".")[0]
 
         if acc == "-":
             # Panther accessions are under the `target_name` column
