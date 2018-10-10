@@ -28,10 +28,7 @@ def parse_superfamilies(filepath):
 
 
 def run(uri, cdd_masters=None, links=None, processes=1,
-        tmpdir=None, chunk_size=100000):
-
-    if tmpdir is None:
-        tmpdir = gettempdir()
+        tmpdir=gettempdir(), chunk_size=100000):
 
     if cdd_masters is None:
         rm_cdd_masters = True

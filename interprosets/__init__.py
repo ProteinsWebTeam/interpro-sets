@@ -4,6 +4,8 @@
 
 def cli():
     import argparse
+    from tempfile import gettempdir
+
     from . import cdd, pfam, utils
 
     parser = argparse.ArgumentParser(
@@ -16,7 +18,8 @@ def cli():
         "required": True
     }
     dir_arg = {
-        "help": "temporary directory"
+        "help": "temporary directory",
+        "default": gettempdir()
     }
     proc_arg = {
         "help": "number of processes (default: 1)",

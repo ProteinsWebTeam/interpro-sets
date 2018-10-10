@@ -21,10 +21,7 @@ def parse_clans(filepath, entries):
 
 
 def run(uri, hmm_db=None, clans_tsv=None, processes=1,
-        tmpdir=None, chunk_size=100000):
-    
-    if tmpdir is None:
-        tmpdir = gettempdir()
+        tmpdir=gettempdir(), chunk_size=100000):
 
     if hmm_db is None:
         rm_hmm_db = True
