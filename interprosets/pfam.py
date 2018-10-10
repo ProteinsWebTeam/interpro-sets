@@ -100,6 +100,10 @@ def run(uri, hmm_db=None, clans_tsv=None, processes=1,
         sequence = utils.read_fasta(fa_file)
         targets = utils.parse_hmmscan_results(out_file, tab_file)
 
+        os.remove(fa_file)
+        os.remove(out_file)
+        os.remove(tab_file)
+
         e = entries[acc]
         data1.append((
             acc,
@@ -147,10 +151,6 @@ def run(uri, hmm_db=None, clans_tsv=None, processes=1,
                     data2
                 )
                 data2 = []
-
-        os.remove(fa_file)
-        os.remove(out_file)
-        os.remove(tab_file)
 
         cnt += 1
         if not cnt % 1000:
