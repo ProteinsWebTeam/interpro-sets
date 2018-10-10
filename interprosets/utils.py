@@ -33,8 +33,7 @@ def compass(fasta_file, profile_db):
         "-d", profile_db,
         "-o", out_file
     ]
-    Popen(cmd, stdout=DEVNULL, stderr=DEVNULL).wait()
-
+    _exec_shell(" ".join(cmd)).wait()
     return out_file
 
 
@@ -61,22 +60,19 @@ def extract(src, dst):
 
 
 def hmmconvert(hmm_file):
+    cmd = "hmmconvert " + hmm_file
+    p = _exec_shell(cmd, PIPE, DEVNULL)
     hmm = ""
-    pop = Popen(
-        ["hmmconvert", hmm_file], stdout=PIPE, stderr=DEVNULL
-    )
-    for line in pop.stdout:
+    for line in p.stdout:
         hmm += line.decode("utf-8")
 
-    out, err = pop.communicate()
+    out, err = p.communicate()
     return hmm
 
 
 def hmmemit(hmm_file, fasta_file):
-    return Popen(
-        ["hmmemit", "-c", "-o", fasta_file, hmm_file],
-        stdout=DEVNULL, stderr=DEVNULL
-    ).wait() == 0
+    cmd = ["hmmemit", "-c", "-o", fasta_file, hmm_file]
+    return _exec_shell(" ".join(cmd)).wait() == 0
 
 
 def hmmpress(hmm_db):
@@ -88,7 +84,8 @@ def hmmpress(hmm_db):
         except FileNotFoundError:
             pass
 
-    p = Popen(["hmmpress", hmm_db], stdout=PIPE, stderr=PIPE)
+    cmd = "hmmpress " + hmm_db
+    p = _exec_shell(cmd, PIPE, PIPE)
     out, err = p.communicate()
 
     if p.returncode != 0:
@@ -99,12 +96,11 @@ def hmmscan(fasta_file, hmm_db):
     tab_file = fasta_file[:-2] + 'tab'
     out_file = fasta_file[:-2] + 'out'
 
+    cmd = ["hmmscan", "--domtblout", tab_file, hmm_db, fasta_file]
+
     with open(out_file, 'wt') as fh:
         # (?) option for --cut_ga and -E
-        Popen(
-            ["hmmscan", "--domtblout", tab_file, hmm_db, fasta_file],
-            stdout=fh, stderr=DEVNULL
-        ).wait()
+        _exec_shell(" ".join(cmd), fh).wait()
 
     return out_file, tab_file
 
@@ -201,11 +197,8 @@ def logger(msg):
 
 
 def mk_compass_db(files_list, profile_db):
-    return Popen(
-        ["mk_compass_db", "-i", files_list, "-o", profile_db],
-        stdout=DEVNULL,
-        stderr=DEVNULL
-    ).wait() == 0
+    cmd = ["mk_compass_db", "-i", files_list, "-o", profile_db]
+    return _exec_shell(" ".join(cmd)).wait() == 0
 
 
 def parse_compass_results(out_file):
@@ -442,6 +435,10 @@ def _compass(args):
     acc, fasta_file, profile_db = args
     out_file = compass(fasta_file, profile_db)
     return acc, fasta_file, out_file
+
+
+def _exec_shell(cmd, stdout=DEVNULL, stderr=DEVNULL):
+    return Popen(cmd, shell=True, stdout=stdout, stderr=stderr)
 
 
 def _hmmconvert(args):
