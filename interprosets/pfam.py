@@ -84,7 +84,7 @@ def run(uri, hmm_db=None, clans_tsv=None, processes=1,
         os.remove(hmm_file)
         jobs.append((acc, fa_file, hmm_db))
 
-    utils.logger("prepare HMM database")
+    utils.logger("compress HMM database")
     utils.hmmpress(hmm_db)
 
     con, cur = utils.connect(uri)
