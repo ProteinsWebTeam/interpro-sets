@@ -192,8 +192,8 @@ def run(uri, cdd_masters=None, links=None, processes=1, tmpdir=gettempdir()):
             data2
         )
 
-    cur.close()
     con.commit()
+    cur.close()
     con.close()
 
     os.remove(profile_db)
