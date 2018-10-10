@@ -144,8 +144,8 @@ def run(uri, books, tmpdir=gettempdir(), processes=1):
     if data1:
         cur.executemany(
             """
-            INSERT INTO INTERPRO.SET_MEMBER
-            VALUES (:1, :2, :3, :4)
+            INSERT INTO INTERPRO.METHOD_SET
+            VALUES (:1, :2, :3)
             """,
             data1
         )
@@ -159,8 +159,8 @@ def run(uri, books, tmpdir=gettempdir(), processes=1):
             data2
         )
 
-    cur.close()
     con.commit()
+    cur.close()
     con.close()
 
     os.remove(hmm_db)

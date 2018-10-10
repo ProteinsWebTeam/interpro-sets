@@ -153,7 +153,7 @@ def run(uri, hmm_db=None, clans_tsv=None, processes=1, tmpdir=gettempdir()):
     if data1:
         cur.executemany(
             """
-            INSERT INTO INTERPRO.SET_MEMBER
+            INSERT INTO INTERPRO.METHOD_SET
             VALUES (:1, :2, :3, :4)
             """,
             data1
@@ -168,8 +168,8 @@ def run(uri, hmm_db=None, clans_tsv=None, processes=1, tmpdir=gettempdir()):
             data2
         )
 
-    cur.close()
     con.commit()
+    cur.close()
     con.close()
 
     if rm_hmm_db:
