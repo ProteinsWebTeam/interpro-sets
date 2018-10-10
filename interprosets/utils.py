@@ -275,7 +275,7 @@ def parse_compass_results(out_file):
             next(it)
             next(it)
             next(it)
-            target = line.split()
+            target = next(it).split()
 
             if block == 1:
                 query_id = query[0]
@@ -286,6 +286,8 @@ def parse_compass_results(out_file):
             else:
                 query_seq += query[1]
                 target_seq += target[1]
+
+            block += 1
 
     targets[target_id] = {
         "id": target_id,
