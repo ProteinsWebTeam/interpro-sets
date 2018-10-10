@@ -66,7 +66,7 @@ def run(uri, hmm_db=None, clans_tsv=None, processes=1,
 
     utils.logger("run hmmemit")
     jobs = []
-    dirs = set()
+    dirs = []
     for acc, e in entries.items():
         fd, hmm_file = mkstemp(dir=tmpdir)
         os.close(fd)
@@ -79,15 +79,13 @@ def run(uri, hmm_db=None, clans_tsv=None, processes=1,
             os.mkdir(_dir)
         except FileExistsError:
             pass
+        else:
+            dirs.append(_dir)
 
         fa_file = os.path.join(_dir, acc + ".fa")
-
-        dirs.add(_dir)
-
-        if utils.hmmemit(hmm_file, fa_file):
-            jobs.append((acc, fa_file, hmm_db))
-
+        utils.hmmemit(hmm_file, fa_file)
         os.remove(hmm_file)
+        jobs.append((acc, fa_file, hmm_db))
 
     utils.logger("prepare HMM database")
     utils.hmmpress(hmm_db)
@@ -96,8 +94,9 @@ def run(uri, hmm_db=None, clans_tsv=None, processes=1,
     cnt = 0
     data1 = []
     data2 = []
+    utils.logger("run hmmscan: {:>10} / {}".format(cnt, len(jobs)))
     for acc, fa_file, out_file, tab_file in utils.batch_hmmscan(jobs, processes):
-        sequence = utils.read_fasta(fa_file)
+        sequence, _ = utils.read_fasta(fa_file)
         targets = utils.parse_hmmscan_results(out_file, tab_file)
 
         os.remove(fa_file)
