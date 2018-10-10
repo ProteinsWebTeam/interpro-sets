@@ -169,7 +169,6 @@ def run(uri, hmm_db=None, clans_tsv=None, processes=1,
             """,
             data2
         )
-        data2 = []
 
     cur.close()
     con.commit()
