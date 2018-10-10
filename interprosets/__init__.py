@@ -6,7 +6,7 @@ def cli():
     import argparse
     from tempfile import gettempdir
 
-    from . import cdd, panther, pfam, utils
+    from . import cdd, panther, pfam, pirsf, utils
 
     parser = argparse.ArgumentParser(
         description="Sets/Collections in InterPro"
@@ -55,8 +55,8 @@ def cli():
     _parser.add_argument("--uri", **uri_arg)
     _parser.add_argument("--dir", **dir_arg)
     _parser.add_argument("-p", **proc_arg)
-    _parser.add_argument("--hmm", help="Pfam-A HMM file")
-    _parser.add_argument("--clans", help="Pfam clans TSV file")
+    _parser.add_argument("--hmm", help="PIRSF HMM file", required=True)
+    _parser.add_argument("--info", help="pirsfinfo.dat file")
 
     _parser = subparsers.add_parser("pirsf", help="")
     _parser.add_argument("--uri", **uri_arg)
@@ -78,4 +78,5 @@ def cli():
         pfam.run(args.uri, hmm_db=args.hmm, clans_tsv=args.clans, 
                  processes=args.processes, tmpdir=args.dir)
     elif args.command == "pirsf":
-        pass
+        pirsf.run(args.uri, args.hmm, pirsfinfo=args.info,
+                  tmpdir=args.dir, processes=args.processes)
