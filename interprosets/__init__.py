@@ -55,13 +55,15 @@ def cli():
     _parser.add_argument("--uri", **uri_arg)
     _parser.add_argument("--dir", **dir_arg)
     _parser.add_argument("-p", **proc_arg)
-    _parser.add_argument("--hmm", help="PIRSF HMM file", required=True)
-    _parser.add_argument("--info", help="pirsfinfo.dat file")
+    _parser.add_argument("--hmm", help="Pfam-A HMM file")
+    _parser.add_argument("--clans", help="Pfam clans TSV file")
 
     _parser = subparsers.add_parser("pirsf", help="")
     _parser.add_argument("--uri", **uri_arg)
     _parser.add_argument("--dir", **dir_arg)
     _parser.add_argument("-p", **proc_arg)
+    _parser.add_argument("--hmm", help="PIRSF HMM file", required=True)
+    _parser.add_argument("--info", help="pirsfinfo.dat file")
 
     args = parser.parse_args()
 
