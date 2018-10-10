@@ -4,7 +4,7 @@
 
 def cli():
     import argparse
-    from . import pfam, utils
+    from . import cdd, pfam, utils
 
     parser = argparse.ArgumentParser(
         description="Sets/Collections in InterPro"
@@ -24,10 +24,6 @@ def cli():
         "default": 1,
         "dest": "processes"
     }
-    files_arg = {
-        "help": "keep generated files (requires --dir, default: off)",
-        "action": "store_true"
-    }
 
     parser.add_argument("--dir",
                         help="temporary directory")
@@ -39,23 +35,24 @@ def cli():
     _parser = subparsers.add_parser("init", help="(re)create tables")
     _parser.add_argument("--uri", **uri_arg)
 
-    _parser = subparsers.add_parser("cdd", help="")
+    _parser = subparsers.add_parser("cdd", help="CDD profile-profile alignments with COMPASS")
     _parser.add_argument("--uri", **uri_arg)
     _parser.add_argument("--dir", **dir_arg)
     _parser.add_argument("-p", **proc_arg)
+    _parser.add_argument("--sequences", help="FASTA file of representative sequences")
+    _parser.add_argument("--links", help="list of superfamilies and their domain models")
 
     _parser = subparsers.add_parser("panther", help="")
     _parser.add_argument("--uri", **uri_arg)
     _parser.add_argument("--dir", **dir_arg)
     _parser.add_argument("-p", **proc_arg)
 
-    _parser = subparsers.add_parser("pfam", help="")
+    _parser = subparsers.add_parser("pfam", help="Pfam profile-profile alignments with HMMSCAN")
     _parser.add_argument("--uri", **uri_arg)
     _parser.add_argument("--dir", **dir_arg)
     _parser.add_argument("-p", **proc_arg)
     _parser.add_argument("--hmm", help="Pfam-A HMM file")
     _parser.add_argument("--clans", help="Pfam clans TSV file")
-    _parser.add_argument("--keep-files", **files_arg)
 
     _parser = subparsers.add_parser("pirsf", help="")
     _parser.add_argument("--uri", **uri_arg)
@@ -67,12 +64,13 @@ def cli():
     if args.command == "init":
         utils.init_tables(args.uri)
     elif args.command == "cdd":
-        pass
+        cdd.run(args.uri, cdd_masters=args.sequences,
+                links=args.links, processes=args.processes,
+                tmpdir=args.dir)
     elif args.command == "panther":
         pass
     elif args.command == "pfam":
         pfam.run(args.uri, hmm_db=args.hmm, clans_tsv=args.clans, 
-                 processes=args.processes, tmpdir=args.dir, 
-                 keep_files=args.keep_files)
+                 processes=args.processes, tmpdir=args.dir)
     elif args.command == "pirsf":
         pass
