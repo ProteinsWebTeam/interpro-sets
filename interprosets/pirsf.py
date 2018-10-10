@@ -65,7 +65,7 @@ def run(uri, sf_hmm_all, pirsfinfo=None, tmpdir=gettempdir(), processes=1):
             with open(hmm_file, "wt") as fh2:
                 fh2.write(e["hmm"])
 
-            _dir = os.path.join(tmpdir, acc[:5])
+            _dir = os.path.join(tmpdir, acc[:8])
             try:
                 os.mkdir(_dir)
             except FileExistsError:
