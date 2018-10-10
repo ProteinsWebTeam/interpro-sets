@@ -6,7 +6,7 @@ def cli():
     import argparse
     from tempfile import gettempdir
 
-    from . import cdd, pfam, utils
+    from . import cdd, panther, pfam, utils
 
     parser = argparse.ArgumentParser(
         description="Sets/Collections in InterPro"
@@ -49,6 +49,7 @@ def cli():
     _parser.add_argument("--uri", **uri_arg)
     _parser.add_argument("--dir", **dir_arg)
     _parser.add_argument("-p", **proc_arg)
+    _parser.add_argument("--books", help="directory of 'books' (protein families)", required=True)
 
     _parser = subparsers.add_parser("pfam", help="Pfam profile-profile alignments with HMMSCAN")
     _parser.add_argument("--uri", **uri_arg)
@@ -71,7 +72,8 @@ def cli():
                 links=args.links, processes=args.processes,
                 tmpdir=args.dir)
     elif args.command == "panther":
-        pass
+        panther.run(args.uri, args.books,
+                    tmpdir=args.dir, processes=args.processes)
     elif args.command == "pfam":
         pfam.run(args.uri, hmm_db=args.hmm, clans_tsv=args.clans, 
                  processes=args.processes, tmpdir=args.dir)
