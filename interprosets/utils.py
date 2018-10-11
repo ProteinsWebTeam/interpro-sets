@@ -6,7 +6,6 @@ import os
 import re
 import sys
 from datetime import datetime
-from decimal import Decimal
 from multiprocessing import Pool
 from subprocess import Popen, PIPE, DEVNULL
 from urllib.request import urlopen
@@ -112,7 +111,7 @@ def init_tables(uri):
         pass
 
     try:
-        cur.execute("DROP TABLE INTERPRO.METHOD_TARGET")
+        cur.execute("DROP TABLE INTERPRO.METHOD_SCAN")
     except:
         pass
 
@@ -164,13 +163,13 @@ def init_tables(uri):
 
     cur.execute(
         """
-        CREATE TABLE INTERPRO.METHOD_TARGET
+        CREATE TABLE INTERPRO.METHOD_SCAN
         (
-            METHOD_AC VARCHAR2(25) NOT NULL,
+            QUERY_AC VARCHAR2(25) NOT NULL,
             TARGET_AC VARCHAR2(25) NOT NULL,
             EVALUE BINARY_DOUBLE NOT NULL,
             DOMAINS CLOB NOT NULL,
-            CONSTRAINT PK_METHOD_TARGET PRIMARY KEY (METHOD_AC, TARGET_AC)
+            CONSTRAINT PK_METHOD_SCAN PRIMARY KEY (QUERY_AC, TARGET_AC)
         )
         """
     )
@@ -249,11 +248,9 @@ def parse_compass_results(out_file):
             line = next(it)
             evalue_str = p2.search(line).group(1)
             try:
-                float(evalue_str)
+                evalue= float(evalue_str)
             except ValueError:
-                evalue = Decimal(0)
-            else:
-                evalue = Decimal(evalue_str)
+                evalue = 0
 
             block = 1
         elif line.startswith("Parameters:"):
@@ -369,7 +366,7 @@ def parse_hmmscan_results(out_file, tab_file):
                 "qlen": int(cols[5]),
 
                 # full sequence
-                "evalue": Decimal(cols[6]),
+                "evalue": float(cols[6]),
                 "score": float(cols[7]),
                 "bias": float(cols[8]),
 
