@@ -6,6 +6,8 @@ import os
 import re
 from tempfile import gettempdir, mkstemp
 
+import cx_Oracle
+
 from . import utils
 
 
@@ -27,6 +29,8 @@ def find_hmm_files(path):
 
 
 def run(uri, books, tmpdir=gettempdir(), processes=1):
+    os.makedirs(tmpdir, exist_ok=True)
+
     fd, hmm_db = mkstemp(dir=tmpdir)
     os.close(fd)
 
@@ -75,10 +79,22 @@ def run(uri, books, tmpdir=gettempdir(), processes=1):
                     len(jobs2), len(jobs)
                 ))
 
+    utils.logger("run hmmemit: {:>6} / {}".format(
+        len(jobs2), len(jobs)
+    ))
+
     utils.logger("compress HMM database")
     utils.hmmpress(hmm_db)
 
-    con, cur = utils.connect(uri)
+    con = cx_Oracle.connect(uri)
+    cur1 = con.cursor()
+    cur2 = con.cursor()
+    cur2.setinputsizes(
+        cx_Oracle.STRING,
+        cx_Oracle.STRING,
+        cx_Oracle.NATIVE_FLOAT,
+        cx_Oracle.CLOB
+    )
     cnt = 0
     data1 = []
     data2 = []
@@ -86,7 +102,7 @@ def run(uri, books, tmpdir=gettempdir(), processes=1):
         sequence, _ = utils.read_fasta(fa_file)
         targets = utils.parse_hmmscan_results(out_file, tab_file)
 
-        os.remove(fa_file)
+        # os.remove(fa_file)
         os.remove(out_file)
         os.remove(tab_file)
 
@@ -97,7 +113,7 @@ def run(uri, books, tmpdir=gettempdir(), processes=1):
         ))
 
         if len(data1) == utils.INSERT_SIZE:
-            cur.executemany(
+            cur1.executemany(
                 """
                 INSERT INTO INTERPRO.METHOD_SET
                 VALUES (:1, :2, :3)
@@ -128,7 +144,7 @@ def run(uri, books, tmpdir=gettempdir(), processes=1):
             ))
 
             if len(data2) == utils.INSERT_SIZE:
-                cur.executemany(
+                cur2.executemany(
                     """
                     INSERT INTO INTERPRO.METHOD_TARGET
                     VALUES (:1, :2, :3, :4)
@@ -142,7 +158,7 @@ def run(uri, books, tmpdir=gettempdir(), processes=1):
             utils.logger("run hmmscan: {:>10} / {}".format(cnt, len(jobs)))
 
     if data1:
-        cur.executemany(
+        cur1.executemany(
             """
             INSERT INTO INTERPRO.METHOD_SET
             VALUES (:1, :2, :3)
@@ -151,7 +167,7 @@ def run(uri, books, tmpdir=gettempdir(), processes=1):
         )
 
     if data2:
-        cur.executemany(
+        cur2.executemany(
             """
             INSERT INTO INTERPRO.METHOD_TARGET
             VALUES (:1, :2, :3, :4)
@@ -159,11 +175,18 @@ def run(uri, books, tmpdir=gettempdir(), processes=1):
             data2
         )
 
+    utils.logger("run hmmscan: {:>10} / {}".format(cnt, len(jobs)))
+
     con.commit()
-    cur.close()
+    cur1.close()
+    cur2.close()
     con.close()
 
-    os.remove(hmm_db)
-
-    for d in dirs:
-        os.rmdir(d)
+    # os.remove(hmm_db)
+    # for ext in ("h3f", "h3i", "h3m", "h3p"):
+    #     try:
+    #         os.remove(hmm_db + "." + ext)
+    #     except FileNotFoundError:
+    #         pass
+    # for d in dirs:
+    #     os.rmdir(d)

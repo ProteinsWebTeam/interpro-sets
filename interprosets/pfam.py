@@ -5,6 +5,8 @@ import json
 import os
 from tempfile import gettempdir, mkstemp
 
+import cx_Oracle
+
 from . import utils
 
 HMM = "ftp://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam-A.hmm.gz"
@@ -21,6 +23,8 @@ def parse_clans(filepath, entries):
 
 
 def run(uri, hmm_db=None, clans_tsv=None, processes=1, tmpdir=gettempdir()):
+    os.makedirs(tmpdir, exist_ok=True)
+
     if hmm_db is None:
         rm_hmm_db = True
         fd, hmm_db = mkstemp(suffix=os.path.basename(HMM), dir=tmpdir)
@@ -85,7 +89,15 @@ def run(uri, hmm_db=None, clans_tsv=None, processes=1, tmpdir=gettempdir()):
     utils.logger("compress HMM database")
     utils.hmmpress(hmm_db)
 
-    con, cur = utils.connect(uri)
+    con = cx_Oracle.connect(uri)
+    cur1 = con.cursor()
+    cur2 = con.cursor()
+    cur2.setinputsizes(
+        cx_Oracle.STRING,
+        cx_Oracle.STRING,
+        cx_Oracle.NATIVE_FLOAT,
+        cx_Oracle.CLOB
+    )
     cnt = 0
     data1 = []
     data2 = []
@@ -94,7 +106,7 @@ def run(uri, hmm_db=None, clans_tsv=None, processes=1, tmpdir=gettempdir()):
         sequence, _ = utils.read_fasta(fa_file)
         targets = utils.parse_hmmscan_results(out_file, tab_file)
 
-        os.remove(fa_file)
+        # os.remove(fa_file)
         os.remove(out_file)
         os.remove(tab_file)
 
@@ -106,7 +118,7 @@ def run(uri, hmm_db=None, clans_tsv=None, processes=1, tmpdir=gettempdir()):
         ))
 
         if len(data1) == utils.INSERT_SIZE:
-            cur.executemany(
+            cur1.executemany(
                 """
                 INSERT INTO INTERPRO.METHOD_SET
                 VALUES (:1, :2, :3)
@@ -137,10 +149,10 @@ def run(uri, hmm_db=None, clans_tsv=None, processes=1, tmpdir=gettempdir()):
             ))
 
             if len(data2) == utils.INSERT_SIZE:
-                cur.executemany(
+                cur2.executemany(
                     """
                     INSERT INTO INTERPRO.METHOD_TARGET
-                    VALUES (:1, :2, :3, :4)
+                    VALUES (:1, :2, :3)
                     """,
                     data2
                 )
@@ -151,16 +163,16 @@ def run(uri, hmm_db=None, clans_tsv=None, processes=1, tmpdir=gettempdir()):
             utils.logger("run hmmscan: {:>10} / {}".format(cnt, len(jobs)))
 
     if data1:
-        cur.executemany(
+        cur1.executemany(
             """
             INSERT INTO INTERPRO.METHOD_SET
-            VALUES (:1, :2, :3, :4)
+            VALUES (:1, :2, :3)
             """,
             data1
         )
 
     if data2:
-        cur.executemany(
+        cur2.executemany(
             """
             INSERT INTO INTERPRO.METHOD_TARGET
             VALUES (:1, :2, :3, :4)
@@ -168,12 +180,20 @@ def run(uri, hmm_db=None, clans_tsv=None, processes=1, tmpdir=gettempdir()):
             data2
         )
 
+    utils.logger("run hmmscan: {:>10} / {}".format(cnt, len(jobs)))
+
     con.commit()
-    cur.close()
+    cur1.close()
+    cur2.close()
     con.close()
 
-    if rm_hmm_db:
-        os.remove(hmm_db)
-
-    for d in dirs:
-        os.rmdir(d)
+    # if rm_hmm_db:
+    #     os.remove(hmm_db)
+    #     for ext in ("h3f", "h3i", "h3m", "h3p"):
+    #         try:
+    #             os.remove(hmm_db + "." + ext)
+    #         except FileNotFoundError:
+    #             pass
+    #
+    # for d in dirs:
+    #     os.rmdir(d)

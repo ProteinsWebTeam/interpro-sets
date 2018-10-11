@@ -6,6 +6,8 @@ import os
 import re
 from tempfile import gettempdir, mkstemp
 
+import cx_Oracle
+
 from . import utils
 
 SEQUENCES = "ftp://ftp.ncbi.nlm.nih.gov/pub/mmdb/cdd/cddmasters.fa.gz"
@@ -28,6 +30,7 @@ def parse_superfamilies(filepath):
 
 
 def run(uri, cdd_masters=None, links=None, processes=1, tmpdir=gettempdir()):
+    os.makedirs(tmpdir, exist_ok=True)
 
     if cdd_masters is None:
         rm_cdd_masters = True
@@ -111,7 +114,15 @@ def run(uri, cdd_masters=None, links=None, processes=1, tmpdir=gettempdir()):
     os.remove(files_list)
 
     jobs = [(acc, entries[acc], profile_db) for acc in entries]
-    con, cur = utils.connect(uri)
+    con = cx_Oracle.connect(uri)
+    cur1 = con.cursor()
+    cur2 = con.cursor()
+    cur2.setinputsizes(
+        cx_Oracle.STRING,
+        cx_Oracle.STRING,
+        cx_Oracle.NATIVE_FLOAT,
+        cx_Oracle.CLOB
+    )
     cnt = 0
     data1 = []
     data2 = []
@@ -120,7 +131,7 @@ def run(uri, cdd_masters=None, links=None, processes=1, tmpdir=gettempdir()):
         sequence, _ = utils.read_fasta(fa_file)
         targets = utils.parse_compass_results(out_file)
 
-        os.remove(fa_file)
+        # os.remove(fa_file)
         os.remove(out_file)
 
         data1.append((
@@ -130,7 +141,7 @@ def run(uri, cdd_masters=None, links=None, processes=1, tmpdir=gettempdir()):
         ))
 
         if len(data1) == utils.INSERT_SIZE:
-            cur.executemany(
+            cur1.executemany(
                 """
                 INSERT INTO INTERPRO.METHOD_SET
                 VALUES (:1, :2, :3)
@@ -161,7 +172,7 @@ def run(uri, cdd_masters=None, links=None, processes=1, tmpdir=gettempdir()):
             ))
 
             if len(data2) == utils.INSERT_SIZE:
-                cur.executemany(
+                cur2.executemany(
                     """
                     INSERT INTO INTERPRO.METHOD_TARGET
                     VALUES (:1, :2, :3, :4)
@@ -175,7 +186,7 @@ def run(uri, cdd_masters=None, links=None, processes=1, tmpdir=gettempdir()):
             utils.logger("run compass: {:>10} / {}".format(cnt, len(jobs)))
 
     if data1:
-        cur.executemany(
+        cur1.executemany(
             """
             INSERT INTO INTERPRO.METHOD_SET
             VALUES (:1, :2, :3)
@@ -184,7 +195,7 @@ def run(uri, cdd_masters=None, links=None, processes=1, tmpdir=gettempdir()):
         )
 
     if data2:
-        cur.executemany(
+        cur2.executemany(
             """
             INSERT INTO INTERPRO.METHOD_TARGET
             VALUES (:1, :2, :3, :4)
@@ -192,10 +203,13 @@ def run(uri, cdd_masters=None, links=None, processes=1, tmpdir=gettempdir()):
             data2
         )
 
+    utils.logger("run compass: {:>10} / {}".format(cnt, len(jobs)))
+
     con.commit()
-    cur.close()
+    cur1.close()
+    cur2.close()
     con.close()
 
-    os.remove(profile_db)
-    for d in dirs:
-        os.rmdir(d)
+    # os.remove(profile_db)
+    # for d in dirs:
+    #     os.rmdir(d)
