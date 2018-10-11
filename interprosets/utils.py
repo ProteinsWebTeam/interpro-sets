@@ -149,7 +149,7 @@ def init_tables(uri):
     #     (
     #         METHOD_AC VARCHAR2(25) NOT NULL,
     #         TARGET_AC VARCHAR2(25) NOT NULL,
-    #         EVALUE FLOAT NOT NULL,
+    #         EVALUE BINARY_DOUBLE NOT NULL,
     #         DOMAINS CLOB NOT NULL,
     #         CONSTRAINT PK_METHOD_TARGET PRIMARY KEY (METHOD_AC, TARGET_AC),
     #         CONSTRAINT FK_METHOD_TARGET$M
