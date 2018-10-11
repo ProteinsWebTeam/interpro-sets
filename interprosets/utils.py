@@ -6,6 +6,7 @@ import os
 import re
 import sys
 from datetime import datetime
+from decimal import Decimal
 from multiprocessing import Pool
 from subprocess import Popen, PIPE, DEVNULL
 from urllib.request import urlopen
@@ -37,12 +38,6 @@ def compass(fasta_file, profile_db):
     ]
     _exec_shell(" ".join(cmd)).wait()
     return out_file
-
-
-def connect(uri):
-    # Format: user/password@host[:port/schema]
-    con = cx_Oracle.connect(uri)
-    return con, con.cursor()
 
 
 def download(url, dst):
@@ -108,7 +103,8 @@ def hmmscan(fasta_file, hmm_db):
 
 
 def init_tables(uri):
-    con, cur = connect(uri)
+    con = cx_Oracle.connect(uri)
+    cur = con.cursor()
 
     try:
         cur.execute("DROP TABLE INTERPRO.METHOD_SET")
@@ -172,7 +168,7 @@ def init_tables(uri):
         (
             METHOD_AC VARCHAR2(25) NOT NULL,
             TARGET_AC VARCHAR2(25) NOT NULL,
-            EVALUE NUMBER NOT NULL,
+            EVALUE BINARY_DOUBLE NOT NULL,
             DOMAINS CLOB NOT NULL,
             CONSTRAINT PK_METHOD_TARGET PRIMARY KEY (METHOD_AC, TARGET_AC)
         )
@@ -251,10 +247,13 @@ def parse_compass_results(out_file):
             length = int(p1.match(line).group(1))
 
             line = next(it)
+            evalue_str = p2.search(line).group(1)
             try:
-                evalue = float(p2.search(line).group(1))
+                float(evalue_str)
             except ValueError:
-                evalue = 0
+                evalue = Decimal(0)
+            else:
+                evalue = Decimal(evalue_str)
 
             block = 1
         elif line.startswith("Parameters:"):
@@ -370,7 +369,7 @@ def parse_hmmscan_results(out_file, tab_file):
                 "qlen": int(cols[5]),
 
                 # full sequence
-                "evalue": float(cols[6]),
+                "evalue": Decimal(cols[6]),
                 "score": float(cols[7]),
                 "bias": float(cols[8]),
 
