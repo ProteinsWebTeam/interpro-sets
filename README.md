@@ -44,6 +44,8 @@ python run.py cdd --uri CONN_STR [--dir TEMPORARY_DIRECTORY] [-p NUM_PROCESSES] 
 
 `--sequences`: FASTA file of representative sequences for each domain. Default: downloaded from CDD FTP.
 
+`--links`: file containing CDD domain and superfamily information. Default: downloaded from CDD FTP.
+
 ### PANTHER superfamilies
 
 ```bash
