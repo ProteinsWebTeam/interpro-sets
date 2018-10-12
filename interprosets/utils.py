@@ -135,6 +135,7 @@ def init_tables(uri):
         CREATE TABLE INTERPRO.METHOD_SET
         (
             METHOD_AC VARCHAR2(25) NOT NULL,
+            DBCODE CHAR(1) NOT NULL,
             SET_AC VARCHAR2(25),
             SEQUENCE CLOB NOT NULL,
             CONSTRAINT PK_METHOD_SET PRIMARY KEY (METHOD_AC)
@@ -221,7 +222,7 @@ def parse_compass_results(out_file):
             Subject= cd154/cd15468.fa
             length=413	filtered_length=413	Neff=1.000
             Smith-Waterman score = 254	Evalue = 3.36e-16
-            
+
             (the path after "Subject=" might be truncated)
             """
             if target_id:
@@ -260,13 +261,13 @@ def parse_compass_results(out_file):
             continue
         elif line:
             """
-            First block:           
+            First block:
             gnl|CDD|271233   1      PSFIPGPT==TPKGCTRIPSFSLSDTHWCYTHNVILSGCQDHSKSNQYLSLGVIKTNSDG
             CONSENSUS_1      1      PSFIPGPT==TPKGCTRIPSFSLSDTHWCYTHNVILSGCQDHSKSNQYLSLGVIKTNSDG
                                     P++IP+ T      C+R PSF++S+  + YT+ V  ++CQDH +  +Y+++GVI+ ++ G
             CONSENSUS_2      1      PNLIPADTGLLSGECVRQPSFAISSGIYAYTYLVRKGSCQDHRSLYRYFEVGVIRDDGLG
             gnl|CDD|271230   1      PNLIPADTGLLSGECVRQPSFAISSGIYAYTYLVRKGSCQDHRSLYRYFEVGVIRDDGLG
-            
+
             (following blocks do not have the start position between the ID and the sequence)
             """
             query = line.split()

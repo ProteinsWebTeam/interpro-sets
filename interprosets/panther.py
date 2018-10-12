@@ -10,6 +10,8 @@ import cx_Oracle
 
 from . import utils
 
+DBOCDE = "V"
+
 
 def find_hmm_files(path):
     entries = {}
@@ -103,6 +105,7 @@ def run(uri, books, tmpdir=gettempdir(), processes=1):
 
         data1.append((
             acc,
+            DBCODE,
             acc.split(":")[0] if ":" in acc else None,
             sequence
         ))
@@ -111,7 +114,7 @@ def run(uri, books, tmpdir=gettempdir(), processes=1):
             cur1.executemany(
                 """
                 INSERT INTO INTERPRO.METHOD_SET
-                VALUES (:1, :2, :3)
+                VALUES (:1, :2, :3, :4)
                 """,
                 data1
             )
@@ -158,7 +161,7 @@ def run(uri, books, tmpdir=gettempdir(), processes=1):
         cur1.executemany(
             """
             INSERT INTO INTERPRO.METHOD_SET
-            VALUES (:1, :2, :3)
+            VALUES (:1, :2, :3, :4)
             """,
             data1
         )

@@ -12,6 +12,7 @@ from . import utils
 
 SEQUENCES = "ftp://ftp.ncbi.nlm.nih.gov/pub/mmdb/cdd/cddmasters.fa.gz"
 LINKS = "ftp://ftp.ncbi.nlm.nih.gov/pub/mmdb/cdd/family_superfamily_links"
+DBOCDE = "J"
 
 
 def parse_superfamilies(filepath):
@@ -131,6 +132,7 @@ def run(uri, cdd_masters=None, links=None, processes=1, tmpdir=gettempdir()):
 
         data1.append((
             acc,
+            DBCODE,
             fam2set.get(acc),
             sequence
         ))
@@ -139,7 +141,7 @@ def run(uri, cdd_masters=None, links=None, processes=1, tmpdir=gettempdir()):
             cur1.executemany(
                 """
                 INSERT INTO INTERPRO.METHOD_SET
-                VALUES (:1, :2, :3)
+                VALUES (:1, :2, :3, :4)
                 """,
                 data1
             )
@@ -186,7 +188,7 @@ def run(uri, cdd_masters=None, links=None, processes=1, tmpdir=gettempdir()):
         cur1.executemany(
             """
             INSERT INTO INTERPRO.METHOD_SET
-            VALUES (:1, :2, :3)
+            VALUES (:1, :2, :3, :4)
             """,
             data1
         )

@@ -11,6 +11,7 @@ import cx_Oracle
 from . import utils
 
 INFO = "ftp://ftp.pir.georgetown.edu/databases/pirsf/pirsfinfo.dat"
+DBOCDE = "U"
 
 
 def parse_dat(filepath):
@@ -103,6 +104,7 @@ def run(uri, sf_hmm_all, pirsfinfo=None, tmpdir=gettempdir(), processes=1):
 
         data1.append((
             acc,
+            DBCODE,
             families.get(acc),
             sequence
         ))
@@ -111,7 +113,7 @@ def run(uri, sf_hmm_all, pirsfinfo=None, tmpdir=gettempdir(), processes=1):
             cur1.executemany(
                 """
                 INSERT INTO INTERPRO.METHOD_SET
-                VALUES (:1, :2, :3)
+                VALUES (:1, :2, :3, :4)
                 """,
                 data1
             )
@@ -158,7 +160,7 @@ def run(uri, sf_hmm_all, pirsfinfo=None, tmpdir=gettempdir(), processes=1):
         cur1.executemany(
             """
             INSERT INTO INTERPRO.METHOD_SET
-            VALUES (:1, :2, :3)
+            VALUES (:1, :2, :3, :4)
             """,
             data1
         )

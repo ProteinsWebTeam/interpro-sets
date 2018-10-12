@@ -11,6 +11,7 @@ from . import utils
 
 HMM = "ftp://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam-A.hmm.gz"
 CLANS = "ftp://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam-A.clans.tsv.gz"
+DBOCDE = "H"
 
 
 def parse_clans(filepath, entries):
@@ -108,6 +109,7 @@ def run(uri, hmm_db=None, clans_tsv=None, processes=1, tmpdir=gettempdir()):
         e = entries[acc]
         data1.append((
             acc,
+            DBCODE,
             e.get("parent"),
             sequence
         ))
@@ -116,7 +118,7 @@ def run(uri, hmm_db=None, clans_tsv=None, processes=1, tmpdir=gettempdir()):
             cur1.executemany(
                 """
                 INSERT INTO INTERPRO.METHOD_SET
-                VALUES (:1, :2, :3)
+                VALUES (:1, :2, :3, :4)
                 """,
                 data1
             )
@@ -163,7 +165,7 @@ def run(uri, hmm_db=None, clans_tsv=None, processes=1, tmpdir=gettempdir()):
         cur1.executemany(
             """
             INSERT INTO INTERPRO.METHOD_SET
-            VALUES (:1, :2, :3)
+            VALUES (:1, :2, :3, :4)
             """,
             data1
         )
