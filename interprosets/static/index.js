@@ -4,13 +4,13 @@ window.addEventListener('load', () => {
         .then(databases => {
 
             const promises = [];
-            databases.forEach((dbname, i) => {
+            databases.forEach((database, i) => {
 
                 promises.push(
-                    fetch('/api/database/' + dbname + '/')
+                    fetch('/api/database/' + database.id + '/')
                         .then(response => response.json())
                         .then(sets => {
-                            let html = '<h3 class="header">'+ dbname +'</h3>'
+                            let html = '<h3 class="header">'+ database.name +'<span class="subheader">'+ sets.length.toLocaleString() +' sets</span></h3>'
                                 + '<div class="collection">';
 
                             sets.forEach(set => {

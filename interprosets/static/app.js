@@ -98,7 +98,7 @@ const network = {
             .attr('dx', radius)
             .style('text-anchor', 'start')
             .style('dominant-baseline', 'middle')
-            .text(d => d.name);
+            .text(d => nvl(d.name, d.accession));
 
         node = _node.merge(node);
         node.call(d3.drag()
@@ -198,7 +198,7 @@ const network = {
             .attr('dx', radius)
             .style('text-anchor', 'start')
             .style('dominant-baseline', 'middle')
-            .text(d => d.name);
+            .text(d => nvl(d.name, d.accession));
 
         node = _node.merge(node);
 
@@ -310,7 +310,7 @@ const network = {
         const parentsOf = {};
         let nodes = {};
         this.data.nodes.forEach(n => {
-            nodes[n.accession] = {name: n.name};
+            nodes[n.accession] = {name: nvl(n.name, n.accession)};
             parentsOf[n.accession] = null;
         });
 
@@ -363,39 +363,6 @@ const network = {
             .separation(d => 1);
 
         const root = d3.hierarchy(nodes);
-        const root2 = d3.hierarchy({
-            "name": "Eve",
-            "children": [
-                {
-                    "name": "Cain"
-                },
-                {
-                    "name": "Seth",
-                    "children": [
-                        {
-                            "name": "Enos"
-                        },
-                        {
-                            "name": "Noam"
-                        }
-                    ]
-                },
-                {
-                    "name": "Abel"
-                },
-                {
-                    "name": "Awan",
-                    "children": [
-                        {
-                            "name": "Enoch"
-                        }
-                    ]
-                },
-                {
-                    "name": "Azura"
-                }
-            ]
-        });
 
         cluster(root);
         this.svg.select('.edges')
@@ -464,7 +431,7 @@ function getTargets(accession) {
                 .domain([1e-6, 1e-3])
                 .range([2, 1, 0]);
 
-            let html = '<h4>'+ entry.name
+            let html = '<h4>'+ nvl(entry.name, entry.accession)
                 + '<div class="subheader">'
                 + entry.accession +'</div>'
                 + '</h4>'
@@ -494,7 +461,7 @@ function getTargets(accession) {
                 html += '<div class="card-panel">' +
                     '<div class="row">' +
                     '<div class="col s6 valign-wrapper">' +
-                    '<h5 class="header">'+ target.name +'<span class="subheader">'+ target.accession +'</span></h5>' +
+                    '<h5 class="header">'+ nvl(target.name, target.accession) +'<span class="subheader">'+ target.accession +'</span></h5>' +
                     '</div>' +
                     '<div class="col s2 valign-wrapper">' +
                     '<div class="statistic"><span class="label">Set</span>'+ set +' </div>' +
@@ -508,7 +475,7 @@ function getTargets(accession) {
                     '</div>' +
                 '<svg data-index="'+ i +'"></svg>';
 
-                svgLabels += '<text x="'+ (svgLeftPadding - 5) +'" y="'+ (20*i + 25) +'">'+ target.name +'</text>';
+                svgLabels += '<text x="'+ (svgLeftPadding - 5) +'" y="'+ (20*i + 25) +'">'+ nvl(target.name, target.accession) +'</text>';
                 svgDomains += '<line x1="0" y1="'+(5+20*(i+1))+'" x2="'+svgWidth+'" y2="'+(5+20*(i+1))+'" stroke="#d7d7d7" />';
 
                 target.domains.forEach(domain => {
@@ -517,7 +484,7 @@ function getTargets(accession) {
                         + '<div class="statistic"><span class="label">i-Evalue</span>'+ domain.ievalue.toExponential() +' </div>'
                         + '</div>'
                         + '<div class="col s10 valign-wrapper">'
-                        + '<pre>'+ domain.seq_query + '<br>' + domain.seq_target + '</pre>'
+                        + '<pre>'+ domain.query + '<br>' + domain.target + '</pre>'
                         + '</div>'
                         + '</div>';
 
@@ -585,7 +552,7 @@ function getTargets(accession) {
 
 
 function getSetMembers(accession) {
-    queryAPI('/api/set/' + accession + '/members/', accession)
+    queryAPI('/api/set/' + accession + '/', accession)
         .then(members => {
             let html = '';
             members.forEach((member, i) => {
@@ -593,12 +560,12 @@ function getSetMembers(accession) {
 
                 if (member.targets_other_set)
                     html += '<span class="badge red-text text-darken-2"><i class="material-icons">error_outline</i>&nbsp;' + member.targets + '</span>';
-                else if (member.targets_no_set)
+                else if (member.targets_without_set)
                     html += '<span class="badge"><i class="material-icons">error_outline</i>&nbsp;' + member.targets + '</span>';
                 else
                     html += '<span class="badge">' + member.targets + '</span>';
 
-                html += member.name + '</a>';
+                html += nvl(member.name, member.accession) + '</a>';
             });
 
 
@@ -618,6 +585,12 @@ function getSetMembers(accession) {
         });
 }
 
+
+function nvl(value, fallback) {
+    return value || fallback;
+}
+
+
 const heatmap = {
     g: null,
     width: null,
@@ -627,8 +600,6 @@ const heatmap = {
     data: null,
     threshold: null,
     evalueCutoff: null,
-    jaccardCutoff: null,
-    mode: 'evalue',
     init: function (selector, margin) {
         this.width = selector.clientWidth;
         this.height = this.width;
@@ -646,19 +617,11 @@ const heatmap = {
         const width = this.width;
         const margin = this.margin;
         const itemSize = Math.min(Math.floor((width - margin.left) / entries.length), 30);
-
-        let data;
-        let cutoff;
-        if (this.mode === 'evalue') {
-            cutoff = this.evalueCutoff;
-            data = this.data;
-        } else {
-            cutoff = 1 - this.jaccardCutoff;
-            data = this.data.map(v => 1 - v);
-        }
+        const data = this.data;
+        const cutoff = this.evalueCutoff;
 
         const band = d3.scaleBand()
-            .domain(entries.map((item, i) => item.name))
+            .domain(entries.map((item, i) => nvl(item.name, item.accession)))
             .range([0, entries.length * itemSize]);
 
         const deg = -65;
@@ -711,18 +674,8 @@ const heatmap = {
 
 
 function getSimilarities(accession) {
-    const type = document.querySelector('input[name=similarity]:checked').value;
-    const url = '/api/set/' + accession + '/similarity/?type=' + type;
+    const url = '/api/set/' + accession + '/similarity/';
     const div = document.getElementById('heatmap');
-
-    heatmap.mode = type;
-    if (type === 'evalue') {
-        div.querySelector('form').style.display = 'none';
-        div.querySelector('.input-field').style.display = 'block';
-    } else {
-        div.querySelector('form').style.display = 'block';
-        div.querySelector('.input-field').style.display = 'none';
-    }
 
     queryAPI(url, accession)
         .then(response => {
@@ -765,21 +718,6 @@ window.addEventListener('load', () => {
         });
 
         heatmap.evalueCutoff = input.value.length ? parseFloat(input.value) : null;
-    })();
-
-    (function () {
-        const input = document.getElementById('sim-range');
-        input.addEventListener('change', e => {
-            const val = parseFloat(e.target.value);
-            if (Number.isNaN())
-                e.target.className = 'invalid';
-            else {
-                heatmap.jaccardCutoff = val;
-                heatmap.update();
-            }
-        });
-
-        heatmap.jaccardCutoff = input.value.length ? parseFloat(input.value) : null;
     })();
 
     (function () {

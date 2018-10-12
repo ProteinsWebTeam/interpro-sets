@@ -57,35 +57,10 @@
         <section id="heatmap">
             <div class="row">
                 <div class="col s6">
-                    <label>Type</label>
-                    <p class="no-mar-top">
-                        <label>
-                            <input name="similarity" value="evalue" type="radio" checked="checked" />
-                            <span>E-value</span>
-                        </label>
-                        <label>
-                            <input name="similarity" value="collocation" type="radio" />
-                            <span>Collocation</span>
-                        </label>
-                        <label>
-                            <input name="similarity" value="overlap" type="radio" />
-                            <span>Overlap</span>
-                        </label>
-                    </p>
-                </div>
-                <div class="col s6">
                     <div class="input-field">
                         <input id="sim-input" type="text">
-                        <label for="sim-input">E-value cutoff</label>
+                        <label for="sim-input">E-value cutoff, e.g. 1e-30</label>
                     </div>
-
-                    <form action="#">
-                        <p class="range-field">
-                            <label for="sim-range">Jaccard index cutoff</label>
-                            <input type="range" id="sim-range" min="0" max="1" step="0.01" value="0.75" />
-                        </p>
-                    </form>
-
                 </div>
             </div>
 
