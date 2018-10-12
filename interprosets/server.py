@@ -15,10 +15,11 @@ except KeyError:
 
 app = Flask(__name__)
 
+
 def get_db():
     if not hasattr(g, "con"):
         g.con = cx_Oracle.connect(URI)
-    return g.database
+    return g.con
 
 
 @app.teardown_appcontext
@@ -42,7 +43,7 @@ def api_databases():
     databases = [dict(zip(("name", "id"), row)) for row in cur]
     cur.close()
 
-    return jsonify(databases), 200
+    return json.jsonify(databases), 200
 
 
 @app.route('/api/database/<dbshort>/')
@@ -64,7 +65,7 @@ def api_database(dbshort):
     sets = [dict(zip(("accession", "count"), row)) for row in cur]
     cur.close()
 
-    return jsonify(sets), 200
+    return json.jsonify(sets), 200
 
 
 @app.route('/api/set/<accession>/')
@@ -72,25 +73,56 @@ def api_set_members(accession):
     cur = get_db().cursor()
     cur.execute(
         """
-        SELECT sm.method_ac,
-          sm.name,
+        SELECT 
+          Q.METHOD_AC,
+          MIN(M.NAME),
           COUNT(*),
-          CAST(SUM(CASE WHEN (sm2.set_ac IS NULL) THEN 1 ELSE 0 END) AS UNSIGNED),
-          CAST(SUM(CASE WHEN (sm2.set_ac IS NOT NULL AND sm2.set_ac != sm.set_ac) THEN 1 ELSE 0 END) AS UNSIGNED)
-        FROM set_method sm
-          INNER JOIN method_target mt ON sm.method_ac = mt.method_ac
-          LEFT OUTER JOIN set_method sm2 on mt.target_ac = sm2.method_ac
-        WHERE sm.set_ac = %s
-        GROUP BY sm.method_ac
-        ORDER BY sm.method_ac
+          CAST(
+            SUM(
+              CASE WHEN (
+                T.SET_AC IS NULL
+              )
+              THEN 1 
+              ELSE 0 
+              END
+            ) 
+            AS NUMBER
+          ),
+          CAST(
+            SUM(
+              CASE WHEN (
+                T.SET_AC IS NOT NULL AND T.SET_AC != Q.SET_AC
+              ) 
+              THEN 1 
+              ELSE 0 
+              END
+            ) 
+            AS NUMBER
+          )
+        FROM INTERPRO.METHOD_SET Q
+        INNER JOIN INTERPRO.METHOD_SCAN SC 
+          ON Q.METHOD_AC = SC.QUERY_AC
+        LEFT OUTER JOIN INTERPRO.METHOD_SET T 
+          ON SC.TARGET_AC = T.METHOD_AC 
+        LEFT OUTER JOIN INTERPRO.METHOD M 
+          ON Q.METHOD_AC = M.METHOD_AC
+        WHERE Q.SET_AC = :1
+        GROUP BY Q.METHOD_AC
+        ORDER BY Q.METHOD_AC
         """,
         (accession,)
     )
 
-    cols = ('accession', 'name', 'targets', 'targets_no_set', 'targets_other_set')
+    cols = (
+        "accession",
+        "name",
+        "targets",
+        "targets_without_set",
+        "targets_other_set"
+    )
     members = [dict(zip(cols, row)) for row in cur]
     cur.close()
-    return jsonify(members), 200 if members else 404
+    return json.jsonify(members), 200 if members else 404
 
 
 @app.route('/api/entry/<accession>/targets/')
@@ -98,9 +130,10 @@ def api_entry_targets(accession):
     cur = get_db().cursor()
     cur.execute(
         """
-        SELECT name, set_ac, sequence
-        FROM set_method
-        WHERE method_ac = %s
+        SELECT NAME, SET_AC, SEQUENCE
+        FROM INTERPRO.METHOD_SET
+        LEFT OUTER JOIN INTERPRO.METHOD USING (METHOD_AC)
+        WHERE METHOD_AC = :1
         """,
         (accession,)
     )
@@ -110,13 +143,16 @@ def api_entry_targets(accession):
     targets = []
     if row:
         name, set_ac, sequence = row
+        sequence = sequence.read()
 
         cur.execute(
             """
-            SELECT sm.method_ac, sm.name, sm.set_ac, mt.evalue, mt.domains
-            FROM method_target mt
-            INNER JOIN set_method sm on mt.target_ac = sm.method_ac
-            WHERE mt.method_ac = %s
+            SELECT SC.TARGET_AC, M.NAME, SE.SET_AC, SC.EVALUE, SC.DOMAINS
+            FROM INTERPRO.METHOD_SCAN SC
+            INNER JOIN INTERPRO.METHOD_SET SE 
+              ON SC.TARGET_AC = SE.METHOD_AC
+            LEFT OUTER JOIN INTERPRO.METHOD M ON SC.TARGET_AC = M.METHOD_AC
+            WHERE SC.QUERY_AC = :1
             """,
             (accession,)
         )
@@ -128,12 +164,12 @@ def api_entry_targets(accession):
                     'name': row[1],
                     'set': row[2],
                     'evalue': row[3],
-                    'domains': json.loads(row[4])
+                    'domains': json.loads(row[4].read())
                 })
 
     cur.close()
 
-    return jsonify({
+    return json.jsonify({
         'accession': accession,
         'name': name,
         'sequence': sequence,
@@ -142,7 +178,7 @@ def api_entry_targets(accession):
             targets,
             key=lambda x: (0 if x['set'] != set_ac else 1, x['evalue'])
         )
-    }), 200 if name else 404
+    }), 200 if sequence else 404
 
 
 @app.route('/api/set/<accession>/relationships/')
@@ -150,13 +186,20 @@ def api_relationships(accession):
     cur = get_db().cursor()
     cur.execute(
         """
-        SELECT sm.method_ac, sm.name, sm2.method_ac, sm2.name, mt.evalue
-        FROM set_method sm
-        INNER JOIN method_target mt ON sm.method_ac = mt.method_ac
-        INNER JOIN set_method sm2 ON mt.target_ac = sm2.method_ac
-        WHERE sm.set_ac = %(acc)s AND sm2.set_ac = %(acc)s
+        SELECT 
+          SC.QUERY_AC, M1.NAME, SC.TARGET_AC, M2.NAME, SC.EVALUE
+        FROM INTERPRO.METHOD_SCAN SC
+        INNER JOIN INTERPRO.METHOD_SET Q
+          ON SC.QUERY_AC = Q.METHOD_AC
+        INNER JOIN INTERPRO.METHOD_SET T
+          ON SC.TARGET_AC = T.METHOD_AC
+        LEFT OUTER JOIN INTERPRO.METHOD M1
+          ON Q.METHOD_AC = M1.METHOD_AC
+        LEFT OUTER JOIN INTERPRO.METHOD M2
+          ON T.METHOD_AC = M2.METHOD_AC
+        WHERE Q.SET_AC = :1 AND T.SET_AC = :1
         """,
-        dict(acc=accession)
+        (accession,)
     )
 
     nodes = {}
@@ -191,7 +234,7 @@ def api_relationships(accession):
 
     cur.close()
 
-    return jsonify({
+    return json.jsonify({
         'accession': accession,
         'data': {
             'nodes': list(nodes.values()),
@@ -210,17 +253,14 @@ def api_relationships(accession):
 
 @app.route('/api/set/<accession>/similarity/')
 def api_set_similarity(accession):
-    sim_type = request.args.get('type', 'evalue')
-    if sim_type not in ('evalue', 'collocation', 'overlap'):
-        return jsonify({}), 400
-
     cur = get_db().cursor()
     cur.execute(
         """
-        SELECT method_ac, name
-        FROM set_method
-        WHERE set_ac = %s
-        ORDER BY method_ac
+        SELECT METHOD_AC, NAME
+        FROM INTERPRO.METHOD_SET MS
+        LEFT OUTER JOIN INTERPRO.METHOD USING (METHOD_AC)
+        WHERE SET_AC = :1
+        ORDER BY METHOD_AC
         """,
         (accession,)
     )
@@ -229,143 +269,40 @@ def api_set_similarity(accession):
     accessions = list(methods.keys())
     methods = sorted(methods.values(), key=lambda x: x['accession'])
 
-    if sim_type == 'evalue':
-        m = [[None] * len(accessions) for _ in accessions]
-    else:
-        m = []
-        for i in range(len(accessions)):
-            m.append([0] * len(accessions))
-            m[i][i] = 1
+    m = [[None] * len(accessions) for _ in accessions]
 
     if accessions:
-        if sim_type == 'evalue':
-            cur.execute(
-                """
-                SELECT method_ac, target_ac, evalue
-                FROM method_target
-                WHERE method_ac IN ({0}) AND target_ac IN ({0})
-                """.format(','.join(['%s' for _ in accessions])),
-                (*accessions, *accessions)
-            )
+        cur.execute(
+            """
+            SELECT 
+              SC.QUERY_AC, M1.NAME, SC.TARGET_AC, M2.NAME, SC.EVALUE
+            FROM INTERPRO.METHOD_SCAN SC
+            INNER JOIN INTERPRO.METHOD_SET Q
+              ON SC.QUERY_AC = Q.METHOD_AC
+            INNER JOIN INTERPRO.METHOD_SET T
+              ON SC.TARGET_AC = T.METHOD_AC
+            LEFT OUTER JOIN INTERPRO.METHOD M1
+              ON Q.METHOD_AC = M1.METHOD_AC
+            LEFT OUTER JOIN INTERPRO.METHOD M2
+              ON T.METHOD_AC = M2.METHOD_AC
+            WHERE Q.SET_AC = :1 AND T.SET_AC = :1
+            """,
+            (accession,)
+        )
 
-            for method_ac, target_ac, evalue in cur:
-                i = accessions.index(method_ac)
-                j = accessions.index(target_ac)
-
-                if m[i][j] is None or evalue < m[i][j]:
-                    m[i][j] = m[j][i] = evalue
-        else:
-            cur.execute(
-                """
-                SELECT method_ac1, method_ac2, collocation, overlap
-                FROM method_similarity
-                WHERE method_ac1 IN ({0})
-                AND method_ac2 IN ({0})
-                """.format(','.join(['%s' for _ in accessions])),
-                (*accessions, *accessions)
-            )
-
-            x = 2 if sim_type == 'collocation' else 3
-            for row in cur:
-                i = accessions.index(row[0])
-                j = accessions.index(row[1])
-                m[i][j] = m[j][i] = row[x]
+        for query_ac, _, target_ac, _, evalue in cur:
+            i = accessions.index(query_ac)
+            j = accessions.index(target_ac)
+            if m[i][j] is None or evalue < m[i][j]:
+                m[i][j] = m[j][i] = evalue
 
     cur.close()
 
-    return jsonify({
+    return json.jsonify({
         'accession': accession,
         'methods': methods,
         'data': m
     })
-
-
-@app.route('/api/set/<accession>/entries/')
-def api_set_entries(accession):
-    cur = get_db().cursor()
-    cur.execute(
-        """
-        SELECT method_ac, name, targets, targets_long
-        FROM method_hmmscan
-        WHERE parent = %s
-        ORDER BY method_ac
-        """,
-        (accession, )
-    )
-
-    entries = []
-    hits = {}
-    for row in cur:
-        acc = row[0]
-        targets = json.loads(row[2] if row[2] else row[3])
-        #targets = [e['accession'] for e in targets if e['accession'] != acc]
-        entries.append({
-            'accession': row[0],
-            'name': row[1],
-            'num_hits': len(targets)
-        })
-
-    cur.close()
-
-    return jsonify({
-        'accession': accession,
-        'entries': entries
-    })
-
-
-@app.route('/api/hits/<accession>/')
-def api_entry_hits(accession):
-    cur = get_db().cursor()
-    cur.execute(
-        """
-        SELECT name, parent, sequence, sequence_long, targets, targets_long
-        FROM method_hmmscan
-        WHERE method_ac = %s
-        """,
-        (accession, )
-    )
-
-    row = cur.fetchone()
-    if row:
-        name = row[0]
-        parent = row[1]
-        sequence = row[2] if row[2] else row[3]
-        targets = json.loads(row[4] if row[4] else row[5])
-        accessions = [t['accession'] for t in targets]
-
-        cur.execute(
-            """
-            SELECT method_ac, name, parent
-            FROM method_hmmscan
-            WHERE method_ac IN ({})
-            """.format(','.join(['%s' for _ in accessions])),
-            accessions
-        )
-
-        entries = {}
-        for row in cur:
-            entries[row[0]] = {
-                'name': row[1],
-                'parent': row[2]
-            }
-
-        for t in targets:
-            try:
-                t.update(entries[t['accession']])  # should *never* throws a key error
-            except KeyError:
-                print(t)
-
-        cur.close()
-        return jsonify({
-            'accession': accession,
-            'name': name,
-            'parent': parent,
-            'sequence': sequence,
-            'hits': targets
-        })
-    else:
-        cur.close()
-        return jsonify({}), 404
 
 
 @app.route('/')
