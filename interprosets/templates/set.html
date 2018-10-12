@@ -1,0 +1,102 @@
+{% include "header.html" %}
+
+<div class="container">
+    <div id="error" class="card-panel red lighten-3">
+        <h4>No results found</h4>
+        <p></p>
+    </div>
+
+    <div id="results">
+        <h3 id="accession" class="header"></h3>
+        <ul class="tabs">
+            <li class="tab"><a class="active" href="#hmmscan">Members</a></li>
+            <li class="tab"><a href="#network">Relationships</a></li>
+            <li class="tab"><a href="#heatmap">Similarity</a></li>
+        </ul>
+
+        <section id="hmmscan">
+            <div class="row">
+                <div class="col s4 m3">
+                    <div id="members" class="collection">
+
+                    </div>
+                </div>
+                <div id="hits" class="col s8 m9">
+
+                </div>
+            </div>
+        </section>
+
+        <section id="network">
+            <div class="row">
+                <div class="col s6">
+                    <label>Type</label>
+                    <p class="no-mar-top">
+                        <label>
+                            <input name="vis-type" value="network" type="radio" checked="checked" />
+                            <span>Network</span>
+                        </label>
+                        <label>
+                            <input name="vis-type" value="chord" type="radio" />
+                            <span>Chord diagram</span>
+                        </label>
+                        <label>
+                            <input name="vis-type" value="tree" type="radio" />
+                            <span>Tree</span>
+                        </label>
+                    </p>
+                </div>
+                <div class="col s6 input-field">
+                    <input id="rel-threshold" type="text">
+                    <label for="rel-threshold">E-value cutoff</label>
+                </div>
+            </div>
+            <div class="chart"></div>
+        </section>
+
+        <section id="heatmap">
+            <div class="row">
+                <div class="col s6">
+                    <label>Type</label>
+                    <p class="no-mar-top">
+                        <label>
+                            <input name="similarity" value="evalue" type="radio" checked="checked" />
+                            <span>E-value</span>
+                        </label>
+                        <label>
+                            <input name="similarity" value="collocation" type="radio" />
+                            <span>Collocation</span>
+                        </label>
+                        <label>
+                            <input name="similarity" value="overlap" type="radio" />
+                            <span>Overlap</span>
+                        </label>
+                    </p>
+                </div>
+                <div class="col s6">
+                    <div class="input-field">
+                        <input id="sim-input" type="text">
+                        <label for="sim-input">E-value cutoff</label>
+                    </div>
+
+                    <form action="#">
+                        <p class="range-field">
+                            <label for="sim-range">Jaccard index cutoff</label>
+                            <input type="range" id="sim-range" min="0" max="1" step="0.01" value="0.75" />
+                        </p>
+                    </form>
+
+                </div>
+            </div>
+
+            <div class="chart"></div>
+        </section>
+    </div>
+</div>
+
+<script type="text/javascript" src="/static/materialize/js/materialize.min.js"></script>
+<script type="text/javascript" src="/static/d3/d3.min.js"></script>
+<script type="text/javascript" src="/static/search.js"></script>
+<script type="text/javascript" src="/static/app.js"></script>
+</body>
+</html>

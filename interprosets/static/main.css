@@ -1,0 +1,175 @@
+header .header {
+    margin-top: 0;
+}
+
+header .header a {
+    color: inherit;
+}
+
+.header {
+    font-weight: 300;
+}
+
+.preloader {
+    margin-top: 2rem;
+}
+
+.col > .header {
+    margin: 0;
+}
+
+#search {
+    width: 400px;
+}
+
+#error {
+    display: none;
+}
+
+.card-panel > :first-child {
+    margin-top: 0;
+}
+
+.card-panel > :last-child {
+    margin-bottom: 0;
+}
+
+.tabs .tab a {
+    color: rgba(13, 71, 161, .7);
+}
+
+.tabs .tab a:hover, .tabs .tab a.active {
+    color: rgba(13, 71, 161, 1);
+}
+
+.tabs .indicator {
+    background-color: rgba(25, 118, 210, 1);
+}
+
+.tabs .tab a:focus, .tabs .tab a:focus.active {
+    background: none;
+}
+
+pre {
+    font-size: 0.85rem;
+}
+
+pre.wrap {
+    white-space: pre-wrap;       /* Since CSS 2.1 */
+    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+    white-space: -pre-wrap;      /* Opera 4-6 */
+    white-space: -o-pre-wrap;    /* Opera 7 */
+    word-wrap: break-word;       /* Internet Explorer 5.5+ */
+
+    padding: .75rem;
+    border: solid 3px #f7f7f9;
+    color: rgba(0, 0, 0, 0.6);
+}
+
+pre .g {background-color: #ffcc80;}
+pre .p {background-color: #fff59d;}
+pre .c,pre .a,pre .v,pre .l,pre .i,pre .m,pre .f,pre .w {background-color: #b39ddb;}
+pre .s,pre .t,pre .n,pre .q {background-color: #a5d6a7;}
+pre .d,pre .e,pre .r,pre .k {background-color: #ef9a9a;}
+pre .h,pre .y {background-color: #90caf9;}
+
+.subheader {
+    font-size: 75%;
+    display: block;
+    font-weight: 400;
+    padding: 0;
+    margin: 0;
+    color: rgba(0, 0, 0, .6);
+}
+
+span.badge .material-icons {
+    font-size: 1rem;
+    line-height: 22px;
+    vertical-align: middle;
+}
+
+.collection-item.active span.badge {
+    color: rgba(234, 250, 249, 0.80);
+}
+
+h5 .badge {
+    font-weight: 300;
+    font-size: 0.8rem;
+    color: #fff;
+    border-radius: 2px;
+    float: none;
+    padding: 6px;
+}
+
+h5 .badge a {
+    color: #fff;
+}
+
+.statistic .label {
+    font-size: .8rem;
+    color: rgba(0, 0, 0, .6);
+    display: block;
+}
+
+.statistic .badge {
+    margin: 0;
+}
+
+.badge a {
+    color: #fff;
+}
+
+.badge.label {
+    font-weight: 300;
+    font-size: 0.8rem;
+    color: #fff;
+    border-radius: 2px;
+}
+
+.col > pre {
+    overflow-x: auto;
+}
+
+.no-mar-top {
+    margin-top: 0;
+}
+
+p > label:nth-child(n+2) {
+    margin-left: 1.5rem;
+}
+
+.axis path {
+    display: none;
+}
+
+section {
+    padding-top: .5rem;
+}
+
+.range-field {
+    margin: 0;
+}
+
+svg .domain {
+    opacity: .5;
+}
+
+svg .domain:hover {
+    opacity: 1;
+    cursor: pointer;
+}
+
+svg .domain text {
+    font: 10px sans-serif;
+    opacity: 0;
+}
+
+svg .domain:hover text {
+    opacity: 1;
+}
+
+svg .labels text {
+    text-anchor: end;
+    dominant-baseline: middle;
+    font: 10px sans-serif;
+}
