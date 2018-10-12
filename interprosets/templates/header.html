@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <title></title>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link type="text/css" rel="stylesheet" href="/static/materialize/css/materialize.min.css" media="screen">
-    <link type="text/css" rel="stylesheet" href="/static/main.css" media="screen">
+    <link href="//fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='materialize/css/materialize.min.css') }}" media="screen">
+    <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='main.css') }}" media="screen">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 </head>
 <body>
 
 <header class="section">
     <div class="container">
-        <h2 class="header"><a href="/">InterPro sets</a></h2>
+        <h2 class="header"><a href="/">Sets in InterPro</a></h2>
         <div class="input-field">
             <i class="material-icons prefix">search</i>
             <input id="search" type="text">
