@@ -146,7 +146,7 @@ def run(uri, hmm_db=None, clans_tsv=None, processes=1, tmpdir=gettempdir()):
             if len(data2) == utils.INSERT_SIZE:
                 cur2.executemany(
                     """
-                    INSERT INTO INTERPRO.METHOD_TARGET
+                    INSERT INTO INTERPRO.METHOD_SCAN
                     VALUES (:query_ac, :target_ac, :evalue, :domains)
                     """,
                     data2

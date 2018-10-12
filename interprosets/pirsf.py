@@ -141,7 +141,7 @@ def run(uri, sf_hmm_all, pirsfinfo=None, tmpdir=gettempdir(), processes=1):
             if len(data2) == utils.INSERT_SIZE:
                 cur2.executemany(
                     """
-                    INSERT INTO INTERPRO.METHOD_TARGET
+                    INSERT INTO INTERPRO.METHOD_SCAN
                     VALUES (:query_ac, :target_ac, :evalue, :domains)
                     """,
                     data2
