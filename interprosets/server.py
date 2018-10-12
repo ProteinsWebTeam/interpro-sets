@@ -5,7 +5,7 @@ import os
 
 import cx_Oracle
 from flask import json
-from flask import Flask, g, render_template, request
+from flask import Flask, g, render_template
 
 
 try:
