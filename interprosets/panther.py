@@ -10,7 +10,7 @@ import cx_Oracle
 
 from . import utils
 
-DBOCDE = "V"
+DBCODE = "V"
 
 
 def find_hmm_files(path):

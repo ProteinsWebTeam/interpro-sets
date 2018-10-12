@@ -11,7 +11,7 @@ from . import utils
 
 HMM = "ftp://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam-A.hmm.gz"
 CLANS = "ftp://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam-A.clans.tsv.gz"
-DBOCDE = "H"
+DBCODE = "H"
 
 
 def parse_clans(filepath, entries):

@@ -11,7 +11,7 @@ import cx_Oracle
 from . import utils
 
 INFO = "ftp://ftp.pir.georgetown.edu/databases/pirsf/pirsfinfo.dat"
-DBOCDE = "U"
+DBCODE = "U"
 
 
 def parse_dat(filepath):

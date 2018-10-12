@@ -12,7 +12,7 @@ from . import utils
 
 SEQUENCES = "ftp://ftp.ncbi.nlm.nih.gov/pub/mmdb/cdd/cddmasters.fa.gz"
 LINKS = "ftp://ftp.ncbi.nlm.nih.gov/pub/mmdb/cdd/family_superfamily_links"
-DBOCDE = "J"
+DBCODE = "J"
 
 
 def parse_superfamilies(filepath):
