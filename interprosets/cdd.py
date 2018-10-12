@@ -117,12 +117,7 @@ def run(uri, cdd_masters=None, links=None, processes=1, tmpdir=gettempdir()):
     con = cx_Oracle.connect(uri)
     cur1 = con.cursor()
     cur2 = con.cursor()
-    cur2.setinputsizes(
-        cx_Oracle.STRING,
-        cx_Oracle.STRING,
-        cx_Oracle.NATIVE_FLOAT,
-        cx_Oracle.CLOB
-    )
+    cur2.setinputsizes(evalue=cx_Oracle.NATIVE_FLOAT)
     cnt = 0
     data1 = []
     data2 = []
@@ -156,11 +151,11 @@ def run(uri, cdd_masters=None, links=None, processes=1, tmpdir=gettempdir()):
             if acc == t_acc:
                 continue
 
-            data2.append((
-                acc,
-                t_acc,
-                t["evalue"],
-                json.dumps([
+            data2.append({
+                "query_ac": acc,
+                "target_ac": t_acc,
+                "evalue": t["evalue"],
+                "domains": json.dumps([
                     {
                         "query": t["sequences"]["query"],
                         "target": t["sequences"]["target"],
@@ -169,13 +164,13 @@ def run(uri, cdd_masters=None, links=None, processes=1, tmpdir=gettempdir()):
                         "end": t["end"]
                     }
                 ])
-            ))
+            })
 
             if len(data2) == utils.INSERT_SIZE:
                 cur2.executemany(
                     """
                     INSERT INTO INTERPRO.METHOD_TARGET
-                    VALUES (:1, :2, :3, :4)
+                    VALUES (:query_ac, :target_ac, :evalue, :domains)
                     """,
                     data2
                 )
@@ -184,6 +179,8 @@ def run(uri, cdd_masters=None, links=None, processes=1, tmpdir=gettempdir()):
         cnt += 1
         if not cnt % 1000:
             utils.logger("run compass: {:>10} / {}".format(cnt, len(jobs)))
+
+    utils.logger("run compass: {:>10} / {}".format(cnt, len(jobs)))
 
     if data1:
         cur1.executemany(
@@ -197,13 +194,11 @@ def run(uri, cdd_masters=None, links=None, processes=1, tmpdir=gettempdir()):
     if data2:
         cur2.executemany(
             """
-            INSERT INTO INTERPRO.METHOD_TARGET
-            VALUES (:1, :2, :3, :4)
+            INSERT INTO INTERPRO.METHOD_SCAN
+            VALUES (:query_ac, :target_ac, :evalue, :domains)
             """,
             data2
         )
-
-    utils.logger("run compass: {:>10} / {}".format(cnt, len(jobs)))
 
     con.commit()
     cur1.close()

@@ -89,12 +89,7 @@ def run(uri, books, tmpdir=gettempdir(), processes=1):
     con = cx_Oracle.connect(uri)
     cur1 = con.cursor()
     cur2 = con.cursor()
-    cur2.setinputsizes(
-        cx_Oracle.STRING,
-        cx_Oracle.STRING,
-        cx_Oracle.NATIVE_FLOAT,
-        cx_Oracle.CLOB
-    )
+    cur2.setinputsizes(evalue=cx_Oracle.NATIVE_FLOAT)
     cnt = 0
     data1 = []
     data2 = []
@@ -136,18 +131,18 @@ def run(uri, books, tmpdir=gettempdir(), processes=1):
                     "end": dom["coordinates"]["ali"]["end"],
                 })
 
-            data2.append((
-                acc,
-                t["accession"],
-                t["evalue"],
-                json.dumps(domains)
-            ))
+            data2.append({
+                "query_ac": acc,
+                "target_ac": t["accession"],
+                "evalue": t["evalue"],
+                "domains": json.dumps(domains)
+            })
 
             if len(data2) == utils.INSERT_SIZE:
                 cur2.executemany(
                     """
                     INSERT INTO INTERPRO.METHOD_TARGET
-                    VALUES (:1, :2, :3, :4)
+                    VALUES (:query_ac, :target_ac, :evalue, :domains)
                     """,
                     data2
                 )
@@ -156,6 +151,8 @@ def run(uri, books, tmpdir=gettempdir(), processes=1):
         cnt += 1
         if not cnt % 1000:
             utils.logger("run hmmscan: {:>10} / {}".format(cnt, len(jobs)))
+
+    utils.logger("run hmmscan: {:>10} / {}".format(cnt, len(jobs)))
 
     if data1:
         cur1.executemany(
@@ -169,13 +166,11 @@ def run(uri, books, tmpdir=gettempdir(), processes=1):
     if data2:
         cur2.executemany(
             """
-            INSERT INTO INTERPRO.METHOD_TARGET
-            VALUES (:1, :2, :3, :4)
+            INSERT INTO INTERPRO.METHOD_SCAN
+            VALUES (:query_ac, :target_ac, :evalue, :domains)
             """,
             data2
         )
-
-    utils.logger("run hmmscan: {:>10} / {}".format(cnt, len(jobs)))
 
     con.commit()
     cur1.close()
