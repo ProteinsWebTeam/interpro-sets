@@ -85,9 +85,9 @@ flask run
 
 ## Resource usage
 
-| command        | processes  | memory usage | disk usage | Time |
-| ------------- |------------:|----:|---:|---:|
-| pirsf| 8 | 8 GB | 1.3 GB | 15 m |
-| pfam| 8 | 16 GB | 3 GB | 1 h 20 m |
-| cdd| 16 | < 3 GB | < 1 GB | 6 h 15 m |
-| panther| 16 | - | - | - |
+| command   | families | processes   | memory usage | disk usage | Time     |
+|-----------|---------:|------------:|-------------:|-----------:|---------:|
+| pirsf     |     3283 |           8 |         8 GB |     1.3 GB |     15 m |
+| pfam      |    17929 |           8 |        16 GB |       3 GB | 1 h 20 m |
+| cdd       |    12774 |          16 |       < 3 GB |     < 1 GB | 6 h 15 m |
+| panther   |    90742 |          16 |            - |          - |        - |
