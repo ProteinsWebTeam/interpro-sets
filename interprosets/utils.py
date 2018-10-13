@@ -12,7 +12,7 @@ from urllib.request import urlopen
 
 import cx_Oracle
 
-INSERT_SIZE = 100000
+INSERT_SIZE = 1000
 
 
 def batch_compass(jobs, processes=1):
