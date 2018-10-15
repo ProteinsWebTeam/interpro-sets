@@ -74,7 +74,9 @@ python run.py pirsf --uri CONN_STR --hmm SF_HMM_ALL [--dir TEMPORARY_DIRECTORY] 
 
 `--info`: file containing PIRSF family and superfamily information. Default: downloaded from PIRSF FTP.
 
-### Flask application
+### Web application
+
+Using Flask's built-in server:
 
 ```bash
 export FLASK_APP=interprosets/server.py
@@ -82,6 +84,12 @@ export INTERPRO_SETS_URI="user/password@[host:port/]service"
 flask run
 ```
 
+Using Gunicorn:
+
+```bash
+export INTERPRO_SETS_URI="user/password@[host:port/]service"
+gunicorn interprosets.server:app
+```
 
 ## Resource usage
 
