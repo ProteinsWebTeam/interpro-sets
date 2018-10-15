@@ -90,4 +90,4 @@ flask run
 | pirsf     |     3283 |           8 |         8 GB |     1.3 GB |     15 m |
 | pfam      |    17929 |           8 |        16 GB |       3 GB | 1 h 20 m |
 | cdd       |    12774 |          16 |       < 3 GB |     < 1 GB | 6 h 15 m |
-| panther   |    90742 |          16 |            - |          - |        - |
+| panther   |    90742 |          16 |        27 GB |      40 GB |     40 h |
