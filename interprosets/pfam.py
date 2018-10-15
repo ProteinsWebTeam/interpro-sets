@@ -102,7 +102,7 @@ def run(uri, hmm_db=None, clans_tsv=None, processes=1, tmpdir=gettempdir()):
         sequence, _ = utils.read_fasta(fa_file)
         targets = utils.parse_hmmscan_results(out_file, tab_file)
 
-        # os.remove(fa_file)
+        os.remove(fa_file)
         os.remove(out_file)
         os.remove(tab_file)
 
@@ -184,13 +184,13 @@ def run(uri, hmm_db=None, clans_tsv=None, processes=1, tmpdir=gettempdir()):
     cur2.close()
     con.close()
 
-    # if rm_hmm_db:
-    #     os.remove(hmm_db)
-    #     for ext in ("h3f", "h3i", "h3m", "h3p"):
-    #         try:
-    #             os.remove(hmm_db + "." + ext)
-    #         except FileNotFoundError:
-    #             pass
-    #
-    # for d in dirs:
-    #     os.rmdir(d)
+    if rm_hmm_db:
+        os.remove(hmm_db)
+        for ext in ("h3f", "h3i", "h3m", "h3p"):
+            try:
+                os.remove(hmm_db + "." + ext)
+            except FileNotFoundError:
+                pass
+
+    for d in dirs:
+        os.rmdir(d)

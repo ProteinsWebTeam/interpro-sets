@@ -127,7 +127,7 @@ def run(uri, cdd_masters=None, links=None, processes=1, tmpdir=gettempdir()):
         sequence, _ = utils.read_fasta(fa_file)
         targets = utils.parse_compass_results(out_file)
 
-        # os.remove(fa_file)
+        os.remove(fa_file)
         os.remove(out_file)
 
         data1.append((
@@ -207,6 +207,6 @@ def run(uri, cdd_masters=None, links=None, processes=1, tmpdir=gettempdir()):
     cur2.close()
     con.close()
 
-    # os.remove(profile_db)
-    # for d in dirs:
-    #     os.rmdir(d)
+    os.remove(profile_db)
+    for d in dirs:
+        os.rmdir(d)

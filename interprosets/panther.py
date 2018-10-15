@@ -99,7 +99,7 @@ def run(uri, books, tmpdir=gettempdir(), processes=1):
         sequence, _ = utils.read_fasta(fa_file)
         targets = utils.parse_hmmscan_results(out_file, tab_file)
 
-        # os.remove(fa_file)
+        os.remove(fa_file)
         os.remove(out_file)
         os.remove(tab_file)
 
@@ -180,11 +180,11 @@ def run(uri, books, tmpdir=gettempdir(), processes=1):
     cur2.close()
     con.close()
 
-    # os.remove(hmm_db)
-    # for ext in ("h3f", "h3i", "h3m", "h3p"):
-    #     try:
-    #         os.remove(hmm_db + "." + ext)
-    #     except FileNotFoundError:
-    #         pass
-    # for d in dirs:
-    #     os.rmdir(d)
+    os.remove(hmm_db)
+    for ext in ("h3f", "h3i", "h3m", "h3p"):
+        try:
+            os.remove(hmm_db + "." + ext)
+        except FileNotFoundError:
+            pass
+    for d in dirs:
+        os.rmdir(d)
