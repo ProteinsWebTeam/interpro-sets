@@ -85,6 +85,8 @@ def run(uri, books, tmpdir=gettempdir(), processes=1):
         len(jobs2), len(jobs)
     ))
 
+    jobs = []
+
     utils.logger("compress HMM database")
     utils.hmmpress(hmm_db)
 
@@ -153,9 +155,9 @@ def run(uri, books, tmpdir=gettempdir(), processes=1):
 
         cnt += 1
         if not cnt % 1000:
-            utils.logger("run hmmscan: {:>10} / {}".format(cnt, len(jobs)))
+            utils.logger("run hmmscan: {:>10} / {}".format(cnt, len(jobs2)))
 
-    utils.logger("run hmmscan: {:>10} / {}".format(cnt, len(jobs)))
+    utils.logger("run hmmscan: {:>10} / {}".format(cnt, len(jobs2)))
 
     if data1:
         cur1.executemany(
