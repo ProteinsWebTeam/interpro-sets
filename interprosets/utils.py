@@ -294,6 +294,7 @@ def parse_compass_results(out_file):
     targets[target_id] = {
         "id": target_id,
         "evalue": evalue,
+        "evaluestr": evalue_str,
         "length": length,
         "start": pos_start,
         "end": pos_start + length - 1,
