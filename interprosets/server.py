@@ -9,9 +9,9 @@ from flask import Flask, g, render_template
 
 
 try:
-    URI = os.environ["INTERPRO_SETS_URI"]
+    URI = os.environ["INTERPRO_URI"]
 except KeyError:
-    raise ValueError("'INTERPRO_SETS_URI' not set")
+    raise ValueError("'INTERPRO_URI' not set")
 
 app = Flask(__name__)
 
