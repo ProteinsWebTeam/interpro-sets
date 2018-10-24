@@ -16,11 +16,25 @@ None required. (」・ω・)」
 
 Common options:
 
-`--uri`: Oracle connection string in the following format: `user/password@[host:port/]service`. `host` and `port` may be omitted, depending on your Oracle TNS configuration.
+**Oracle connection string**
 
-`--dir`: directory for temporary files. Created if it does not exist. Temporary files are not kept. Default: depends on your platform; probably `/tmp/` on Unix-based systems.
+The `INTERPRO_URI` environment variable is used to pass the Oracle connection string to the script. It can be set with the following command:
 
-`-p`: number of processes. Default: 1.
+```bash
+export INTERPRO_URI="user/password@host:port/service"
+```
+
+`host` and `port` may be omitted, depending on your Oracle TNS configuration.
+
+**Temporary directory**
+
+`--dir` specifiees the directory for temporary files. Created if it does not exist. Temporary files are not kept. Default: depends on your platform; probably `/tmp/` on Unix-based systems.
+
+**Number of threads**
+
+Defined with `-p`. Default: 1.
+
+**Paths to binaries**
 
 If HMMER (`hmmconvert`, `hmmpress`, `hmmemit`, `hmmscan`) or COMPASS (`mk_compass_db`, `compass_vs_db`) binaries are not in your `PATH` (e.g. installed on a NFS mounts), you can use the following command to add them:
 
@@ -33,13 +47,13 @@ export PATH=/path/to/directory/:$PATH
 Drop the `METHOD_SET` and `METHOD_SCAN` tables if they exist in the `INTERPRO` Oracle schema, then create them.
 
 ```bash
-python run.py init --uri CONN_STR
+python run.py init
 ```
 
 ### CDD superfamilies
 
 ```bash
-python run.py cdd --uri CONN_STR [--dir TEMPORARY_DIRECTORY] [-p NUM_PROCESSES] [--sequences CDDMASTER] [--links FAMILY_SUPERFAMILY_LINKS]
+python run.py cdd [--dir TEMPORARY_DIRECTORY] [-p NUM_PROCESSES] [--sequences CDDMASTER] [--links FAMILY_SUPERFAMILY_LINKS]
 ```
 
 `--sequences`: FASTA file of representative sequences for each domain. Default: downloaded from CDD FTP.
@@ -49,7 +63,7 @@ python run.py cdd --uri CONN_STR [--dir TEMPORARY_DIRECTORY] [-p NUM_PROCESSES] 
 ### PANTHER superfamilies
 
 ```bash
-python run.py panther --uri CONN_STR --books BOOKS_DIRECTORY [--dir TEMPORARY_DIRECTORY] [-p NUM_PROCESSES]
+python run.py panther --books BOOKS_DIRECTORY [--dir TEMPORARY_DIRECTORY] [-p NUM_PROCESSES]
 ```
 
 `--books`: directory of PANTHER "books", each representing a protein family (expects a `hmmer.hmm` file for each book).
@@ -57,7 +71,7 @@ python run.py panther --uri CONN_STR --books BOOKS_DIRECTORY [--dir TEMPORARY_DI
 ### Pfam clans
 
 ```bash
-python run.py pfam --uri CONN_STR [--dir TEMPORARY_DIRECTORY] [-p NUM_PROCESSES] [--hmm PFAM-A] [--clans PFAM_CLANS]
+python run.py pfam [--dir TEMPORARY_DIRECTORY] [-p NUM_PROCESSES] [--hmm PFAM-A] [--clans PFAM_CLANS]
 ```
 
 `--hmm`: file containing the Pfam-A HMMs. Default: downloaded from Pfam FTP.
@@ -67,7 +81,7 @@ python run.py pfam --uri CONN_STR [--dir TEMPORARY_DIRECTORY] [-p NUM_PROCESSES]
 ### PIRSF superfamilies
 
 ```bash
-python run.py pirsf --uri CONN_STR --hmm SF_HMM_ALL [--dir TEMPORARY_DIRECTORY] [-p NUM_PROCESSES] [--info PIRSFINFO]
+python run.py pirsf --hmm SF_HMM_ALL [--dir TEMPORARY_DIRECTORY] [-p NUM_PROCESSES] [--info PIRSFINFO]
 ```
 
 `--hmm`: file containing the PIRSF HMMs.
