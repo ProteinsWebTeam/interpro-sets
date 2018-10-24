@@ -212,6 +212,7 @@ def parse_compass_results(out_file):
     target_seq = ""
     length = None
     evalue = None
+    evalue_str = None
     pos_start = None
 
     it = iterlines(out_file)
@@ -230,6 +231,7 @@ def parse_compass_results(out_file):
                 targets[target_id] = {
                     "id": target_id,
                     "evalue": evalue,
+                    "evaluestr": evalue_str,
                     "length": length,
                     "start": pos_start,
                     "end": pos_start + length - 1,
