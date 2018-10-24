@@ -28,7 +28,7 @@ export INTERPRO_URI="user/password@host:port/service"
 
 **Temporary directory**
 
-`--dir` specifiees the directory for temporary files. Created if it does not exist. Temporary files are not kept. Default: depends on your platform; probably `/tmp/` on Unix-based systems.
+`--dir` specifies the directory for temporary files. It is created if it does not exist, and temporary files are deleted on completion (the directory itself is not deleted). Default: depends on your platform; probably `/tmp/` on Unix-based systems.
 
 **Number of threads**
 
