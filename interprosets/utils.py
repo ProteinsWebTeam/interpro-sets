@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import gzip
-import multiprocessing as mp
 import os
 import re
 import sys
 from datetime import datetime
+from multiprocessing.dummy import Pool
 from subprocess import Popen, PIPE, DEVNULL
 from urllib.request import urlopen
 
@@ -428,8 +428,7 @@ def read_fasta(filepath, reo=None):
 
 def _batch(func, jobs, processes):
     if processes > 1:
-        ctx = mp.get_context("spawn")
-        with ctx.Pool(processes) as pool:
+        with Pool(processes) as pool:
             for res in pool.imap_unordered(func, jobs):
                 yield res
     else:
