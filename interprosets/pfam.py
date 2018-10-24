@@ -142,6 +142,7 @@ def run(uri, hmm_db=None, clans_tsv=None, processes=1, tmpdir=gettempdir()):
                 "query_ac": acc,
                 "target_ac": t["accession"],
                 "evalue": t["evalue"],
+                "evaluestr": t["evaluestr"],
                 "domains": json.dumps(domains)
             })
 
@@ -149,7 +150,9 @@ def run(uri, hmm_db=None, clans_tsv=None, processes=1, tmpdir=gettempdir()):
                 cur2.executemany(
                     """
                     INSERT INTO INTERPRO.METHOD_SCAN
-                    VALUES (:query_ac, :target_ac, :evalue, :domains)
+                    VALUES (
+                      :query_ac, :target_ac, :evalue, :evaluestr, :domains
+                    )
                     """,
                     data2
                 )
@@ -174,7 +177,9 @@ def run(uri, hmm_db=None, clans_tsv=None, processes=1, tmpdir=gettempdir()):
         cur2.executemany(
             """
             INSERT INTO INTERPRO.METHOD_SCAN
-            VALUES (:query_ac, :target_ac, :evalue, :domains)
+            VALUES (
+              :query_ac, :target_ac, :evalue, :evaluestr, :domains
+            )
             """,
             data2
         )

@@ -169,6 +169,7 @@ def init_tables(uri):
             QUERY_AC VARCHAR2(25) NOT NULL,
             TARGET_AC VARCHAR2(25) NOT NULL,
             EVALUE BINARY_DOUBLE NOT NULL,
+            EVALUE_STR VARCHAR2(10) NOT NULL,
             DOMAINS CLOB NOT NULL,
             CONSTRAINT PK_METHOD_SCAN PRIMARY KEY (QUERY_AC, TARGET_AC)
         )
@@ -368,6 +369,7 @@ def parse_hmmscan_results(out_file, tab_file):
 
                 # full sequence
                 "evalue": float(cols[6]),
+                "evaluestr": cols[6],
                 "score": float(cols[7]),
                 "bias": float(cols[8]),
 
@@ -379,8 +381,10 @@ def parse_hmmscan_results(out_file, tab_file):
 
             # conditional E-value
             "cevalue": float(cols[11]),
+            "cevaluestr": cols[11],
             # independent E-value
             "ievalue": float(cols[12]),
+            "ievaluestr": cols[12],
             "score": float(cols[13]),
             "bias": float(cols[14]),
 
