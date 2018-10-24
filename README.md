@@ -94,14 +94,14 @@ Using Flask's built-in server:
 
 ```bash
 export FLASK_APP=interprosets/server.py
-export INTERPRO_SETS_URI="user/password@[host:port/]service"
+export INTERPRO_URI="user/password@[host:port/]service"
 flask run
 ```
 
 Using Gunicorn:
 
 ```bash
-export INTERPRO_SETS_URI="user/password@[host:port/]service"
+export INTERPRO_URI="user/password@[host:port/]service"
 gunicorn interprosets.server:app
 ```
 
