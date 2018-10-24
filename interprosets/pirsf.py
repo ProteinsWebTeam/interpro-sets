@@ -137,7 +137,7 @@ def run(uri, sf_hmm_all, pirsfinfo=None, tmpdir=gettempdir(), processes=1):
                 "query_ac": acc,
                 "target_ac": t["accession"],
                 "evalue": t["evalue"],
-                "evalue": t["evaluestr"],
+                "evaluestr": t["evaluestr"],
                 "domains": json.dumps(domains)
             })
 
