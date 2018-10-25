@@ -22,8 +22,8 @@ def cli():
         "help": "temporary directory",
         "default": tempfile.gettempdir()
     }
-    proc_arg = {
-        "help": "number of processes (default: 1)",
+    threads_arg = {
+        "help": "number of threads (default: 1)",
         "type": int,
         "default": 1,
         "dest": "processes"
@@ -42,7 +42,7 @@ def cli():
         "cdd", help="CDD profile-profile alignments with COMPASS"
     )
     _parser.add_argument("--dir", **dir_arg)
-    _parser.add_argument("-p", **proc_arg)
+    _parser.add_argument("-t", **threads_arg)
     _parser.add_argument("--sequences",
                          help="FASTA file of representative sequences")
     _parser.add_argument("--links",
@@ -52,7 +52,7 @@ def cli():
         "panther", help="PANTHER profile-profile alignments with HMMSCAN"
     )
     _parser.add_argument("--dir", **dir_arg)
-    _parser.add_argument("-p", **proc_arg)
+    _parser.add_argument("-t", **threads_arg)
     _parser.add_argument("--books",
                          help="directory of 'books' (protein families)",
                          required=True)
@@ -61,7 +61,7 @@ def cli():
         "pfam", help="Pfam profile-profile alignments with HMMSCAN"
     )
     _parser.add_argument("--dir", **dir_arg)
-    _parser.add_argument("-p", **proc_arg)
+    _parser.add_argument("-t", **threads_arg)
     _parser.add_argument("--hmm", help="Pfam-A HMM file")
     _parser.add_argument("--clans", help="Pfam clans TSV file")
 
@@ -69,7 +69,7 @@ def cli():
         "pirsf", help="PIRFS profile-profile alignments with HMMSCAN"
     )
     _parser.add_argument("--dir", **dir_arg)
-    _parser.add_argument("-p", **proc_arg)
+    _parser.add_argument("-t", **threads_arg)
     _parser.add_argument("--hmm", help="PIRSF HMM file", required=True)
     _parser.add_argument("--info", help="pirsfinfo.dat file")
 
