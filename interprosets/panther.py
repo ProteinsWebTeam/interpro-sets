@@ -4,7 +4,7 @@
 import json
 import os
 import re
-from tempfile import gettempdir, mkstemp
+from tempfile import mkstemp
 
 import cx_Oracle
 
@@ -30,9 +30,7 @@ def find_hmm_files(path):
     return entries
 
 
-def run(uri, books, tmpdir=gettempdir(), processes=1):
-    os.makedirs(tmpdir, exist_ok=True)
-
+def run(uri, books, processes=1, tmpdir=None):
     fd, hmm_db = mkstemp(dir=tmpdir)
     os.close(fd)
 
@@ -72,7 +70,6 @@ def run(uri, books, tmpdir=gettempdir(), processes=1):
 
             fa_file = os.path.join(_dir, acc + ".fa")
             utils.hmmemit(hmm_file, fa_file)
-            os.remove(hmm_file)
 
             jobs2.append((acc, fa_file, hmm_db))
 
@@ -91,6 +88,7 @@ def run(uri, books, tmpdir=gettempdir(), processes=1):
     utils.hmmpress(hmm_db)
 
     con = cx_Oracle.connect(uri)
+    utils.prepare_tables(con, DBCODE)
     cur1 = con.cursor()
     cur2 = con.cursor()
     cur2.setinputsizes(evalue=cx_Oracle.NATIVE_FLOAT)
@@ -100,10 +98,6 @@ def run(uri, books, tmpdir=gettempdir(), processes=1):
     for acc, fa_file, out_file, tab_file in utils.batch_hmmscan(jobs2, processes):
         sequence, _ = utils.read_fasta(fa_file)
         targets = utils.parse_hmmscan_results(out_file, tab_file)
-
-        os.remove(fa_file)
-        os.remove(out_file)
-        os.remove(tab_file)
 
         data1.append((
             acc,
@@ -184,12 +178,3 @@ def run(uri, books, tmpdir=gettempdir(), processes=1):
     cur1.close()
     cur2.close()
     con.close()
-
-    os.remove(hmm_db)
-    for ext in ("h3f", "h3i", "h3m", "h3p"):
-        try:
-            os.remove(hmm_db + "." + ext)
-        except FileNotFoundError:
-            pass
-    for d in dirs:
-        os.rmdir(d)

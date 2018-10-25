@@ -4,7 +4,7 @@
 import json
 import os
 import re
-from tempfile import gettempdir, mkstemp
+from tempfile import mkstemp
 
 import cx_Oracle
 
@@ -30,28 +30,19 @@ def parse_superfamilies(filepath):
     return fam2set
 
 
-def run(uri, cdd_masters=None, links=None, processes=1, tmpdir=gettempdir()):
-    os.makedirs(tmpdir, exist_ok=True)
-
+def run(uri, cdd_masters=None, links=None, processes=1, tmpdir=None):
     if cdd_masters is None:
-        rm_cdd_masters = True
         fd, cdd_masters = mkstemp(
             suffix=os.path.basename(SEQUENCES), dir=tmpdir
         )
         os.close(fd)
 
         utils.download(SEQUENCES, cdd_masters)
-    else:
-        rm_cdd_masters = False
 
     if links is None:
-        rm_links = True
         fd, links = mkstemp(suffix=os.path.basename(LINKS), dir=tmpdir)
         os.close(fd)
-
         utils.download(LINKS, links)
-    else:
-        rm_links = False
 
     utils.logger("extract sequences")
     p = re.compile(r">(gnl\|CDD\|\d+)\s+(cd\d+),")
@@ -78,9 +69,6 @@ def run(uri, cdd_masters=None, links=None, processes=1, tmpdir=gettempdir()):
     if buffer and acc:
         entries[acc] = buffer
 
-    if rm_cdd_masters:
-        os.remove(cdd_masters)
-
     fd, files_list = mkstemp(dir=tmpdir)
     os.close(fd)
 
@@ -105,17 +93,14 @@ def run(uri, cdd_masters=None, links=None, processes=1, tmpdir=gettempdir()):
     utils.logger("parse superfamilies")
     fam2set = parse_superfamilies(links)
 
-    if rm_links:
-        os.remove(links)
-
     utils.logger("make profile database")
     fd, profile_db = mkstemp(dir=tmpdir)
     os.close(fd)
     utils.mk_compass_db(files_list, profile_db)
-    os.remove(files_list)
 
     jobs = [(acc, entries[acc], profile_db) for acc in entries]
     con = cx_Oracle.connect(uri)
+    utils.prepare_tables(con, DBCODE)
     cur1 = con.cursor()
     cur2 = con.cursor()
     cur2.setinputsizes(evalue=cx_Oracle.NATIVE_FLOAT)
@@ -126,9 +111,6 @@ def run(uri, cdd_masters=None, links=None, processes=1, tmpdir=gettempdir()):
     for acc, fa_file, out_file in utils.batch_compass(jobs, processes):
         sequence, _ = utils.read_fasta(fa_file)
         targets = utils.parse_compass_results(out_file)
-
-        os.remove(fa_file)
-        os.remove(out_file)
 
         data1.append((
             acc,
@@ -209,7 +191,3 @@ def run(uri, cdd_masters=None, links=None, processes=1, tmpdir=gettempdir()):
     cur1.close()
     cur2.close()
     con.close()
-
-    os.remove(profile_db)
-    for d in dirs:
-        os.rmdir(d)

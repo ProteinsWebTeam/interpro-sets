@@ -521,3 +521,29 @@ def _parse_hmmscan_alignments(filepath):
                     query = ""
 
     return domains
+
+
+def prepare_tables(con, dbcode):
+    cur = con.cursor()
+
+    cur.execute(
+        """
+        DELETE FROM INTERPRO.METHOD_SCAN
+        WHERE QUERY_AC IN (
+          SELECT METHOD_AC FROM INTERPRO.METHOD_SET
+          WHERE DBCODE = :1
+        )
+        """,
+        (dbcode,)
+    )
+
+    cur.execute(
+        """
+        DELETE FROM INTERPRO.METHOD_SET
+        WHERE DBCODE = :1
+        """,
+        (dbcode,)
+    )
+
+    con.commit()
+    cur.close()

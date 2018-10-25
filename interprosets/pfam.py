@@ -3,7 +3,7 @@
 
 import json
 import os
-from tempfile import gettempdir, mkstemp
+from tempfile import mkstemp
 
 import cx_Oracle
 
@@ -23,46 +23,30 @@ def parse_clans(filepath, entries):
             entries[fam_id]["parent"] = clan_id
 
 
-def run(uri, hmm_db=None, clans_tsv=None, processes=1, tmpdir=gettempdir()):
-    os.makedirs(tmpdir, exist_ok=True)
-
+def run(uri, hmm_db=None, clans_tsv=None, processes=1, tmpdir=None):
     if hmm_db is None:
-        rm_hmm_db = True
         fd, hmm_db = mkstemp(suffix=os.path.basename(HMM), dir=tmpdir)
         os.close(fd)
 
         utils.download(HMM, hmm_db)
-    else:
-        rm_hmm_db = False
 
     if hmm_db.endswith(".gz"):
         fd, _hmm_db = mkstemp(dir=tmpdir)
         os.close(fd)
 
         utils.extract(hmm_db, _hmm_db)
-        if rm_hmm_db:
-            os.remove(hmm_db)
-
         hmm_db = _hmm_db
-        rm_hmm_db = True
 
     utils.logger("parse HMMs")
     entries = utils.parse_hmm(hmm_db, keep_hmm=True)
 
     if clans_tsv is None:
-        rm_clans_tsv = True
         fd, clans_tsv = mkstemp(suffix=os.path.basename(CLANS), dir=tmpdir)
         os.close(fd)
-
         utils.download(CLANS, clans_tsv)
-    else:
-        rm_clans_tsv = False
 
     utils.logger("parse clans")
     parse_clans(clans_tsv, entries)
-
-    if rm_clans_tsv:
-        os.remove(clans_tsv)
 
     utils.logger("run hmmemit")
     jobs = []
@@ -84,13 +68,13 @@ def run(uri, hmm_db=None, clans_tsv=None, processes=1, tmpdir=gettempdir()):
 
         fa_file = os.path.join(_dir, acc + ".fa")
         utils.hmmemit(hmm_file, fa_file)
-        os.remove(hmm_file)
         jobs.append((acc, fa_file, hmm_db))
 
     utils.logger("compress HMM database")
     utils.hmmpress(hmm_db)
 
     con = cx_Oracle.connect(uri)
+    utils.prepare_tables(con, DBCODE)
     cur1 = con.cursor()
     cur2 = con.cursor()
     cur2.setinputsizes(evalue=cx_Oracle.NATIVE_FLOAT)
@@ -101,10 +85,6 @@ def run(uri, hmm_db=None, clans_tsv=None, processes=1, tmpdir=gettempdir()):
     for acc, fa_file, out_file, tab_file in utils.batch_hmmscan(jobs, processes):
         sequence, _ = utils.read_fasta(fa_file)
         targets = utils.parse_hmmscan_results(out_file, tab_file)
-
-        os.remove(fa_file)
-        os.remove(out_file)
-        os.remove(tab_file)
 
         e = entries[acc]
         data1.append((
@@ -188,14 +168,3 @@ def run(uri, hmm_db=None, clans_tsv=None, processes=1, tmpdir=gettempdir()):
     cur1.close()
     cur2.close()
     con.close()
-
-    if rm_hmm_db:
-        os.remove(hmm_db)
-        for ext in ("h3f", "h3i", "h3m", "h3p"):
-            try:
-                os.remove(hmm_db + "." + ext)
-            except FileNotFoundError:
-                pass
-
-    for d in dirs:
-        os.rmdir(d)
