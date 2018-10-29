@@ -32,7 +32,7 @@ export INTERPRO_URI="user/password@host:port/service"
 
 **Number of threads**
 
-Defined with `-p`. Default: 1.
+Defined with `-t`. Default: 1.
 
 **Paths to binaries**
 
@@ -53,7 +53,7 @@ python run.py init
 ### CDD superfamilies
 
 ```bash
-python run.py cdd [--dir TEMPORARY_DIRECTORY] [-p NUM_PROCESSES] [--sequences CDDMASTER] [--links FAMILY_SUPERFAMILY_LINKS]
+python run.py cdd [--dir TEMPORARY_DIRECTORY] [-t NUM_THREADS] [--sequences CDDMASTER] [--links FAMILY_SUPERFAMILY_LINKS]
 ```
 
 `--sequences`: FASTA file of representative sequences for each domain. Default: downloaded from CDD FTP.
@@ -63,7 +63,7 @@ python run.py cdd [--dir TEMPORARY_DIRECTORY] [-p NUM_PROCESSES] [--sequences CD
 ### PANTHER superfamilies
 
 ```bash
-python run.py panther --books BOOKS_DIRECTORY [--dir TEMPORARY_DIRECTORY] [-p NUM_PROCESSES]
+python run.py panther --books BOOKS_DIRECTORY [--dir TEMPORARY_DIRECTORY] [-t NUM_THREADS]
 ```
 
 `--books`: directory of PANTHER "books", each representing a protein family (expects a `hmmer.hmm` file for each book).
@@ -71,7 +71,7 @@ python run.py panther --books BOOKS_DIRECTORY [--dir TEMPORARY_DIRECTORY] [-p NU
 ### Pfam clans
 
 ```bash
-python run.py pfam [--dir TEMPORARY_DIRECTORY] [-p NUM_PROCESSES] [--hmm PFAM-A] [--clans PFAM_CLANS]
+python run.py pfam [--dir TEMPORARY_DIRECTORY] [-t NUM_THREADS] [--hmm PFAM-A] [--clans PFAM_CLANS]
 ```
 
 `--hmm`: file containing the Pfam-A HMMs. Default: downloaded from Pfam FTP.
@@ -81,7 +81,7 @@ python run.py pfam [--dir TEMPORARY_DIRECTORY] [-p NUM_PROCESSES] [--hmm PFAM-A]
 ### PIRSF superfamilies
 
 ```bash
-python run.py pirsf --hmm SF_HMM_ALL [--dir TEMPORARY_DIRECTORY] [-p NUM_PROCESSES] [--info PIRSFINFO]
+python run.py pirsf --hmm SF_HMM_ALL [--dir TEMPORARY_DIRECTORY] [-t NUM_THREADS] [--info PIRSFINFO]
 ```
 
 `--hmm`: file containing the PIRSF HMMs.
@@ -107,9 +107,9 @@ gunicorn interprosets.server:app
 
 ## Resource usage
 
-| command   | families | processes   | memory usage | disk usage | Time     |
+| command   | families | threads     | memory usage | disk usage | Time     |
 |-----------|---------:|------------:|-------------:|-----------:|---------:|
-| pirsf     |     3283 |           8 |         8 GB |     1.3 GB |     15 m |
-| pfam      |    17929 |           8 |        16 GB |       3 GB |      1 h |
-| cdd       |    12774 |           8 |         2 GB |       1 GB |     20 h |
-| panther   |    90742 |          16 |        27 GB |      40 GB |     40 h |
+| pirsf     |     3283 |           8 |         2 GB |       2 GB |     15 m |
+| pfam      |    17929 |           8 |         3 GB |       5 GB |      1 h |
+| cdd       |    12774 |           8 |         1 GB |     1.5 GB |     30 h |
+| panther   |    90742 |           8 |        32 GB |     105 GB |    100 h |
