@@ -143,6 +143,20 @@ def init_tables(uri):
         """
     )
 
+    cur.execute(
+        """
+        CREATE INDEX INTERPRO.I_METHOD_SET$DBCODE 
+        ON METHOD_SET(DBCODE);
+        """
+    )
+
+    cur.execute(
+        """
+        CREATE INDEX INTERPRO.I_METHOD_SET$SET 
+        ON METHOD_SET(SET_AC);
+        """
+    )
+
     # cur.execute(
     #     """
     #     CREATE TABLE INTERPRO.METHOD_TARGET
