@@ -115,21 +115,6 @@ def init_tables(uri):
     except:
         pass
 
-    # cur.execute(
-    #     """
-    #     CREATE TABLE INTERPRO.METHOD_SET
-    #     (
-    #         METHOD_AC VARCHAR2(25) NOT NULL,
-    #         SET_AC VARCHAR2(25),
-    #         SEQUENCE CLOB NOT NULL,
-    #         CONSTRAINT PK_METHOD_SET PRIMARY KEY (METHOD_AC),
-    #         CONSTRAINT FK_METHOD_SET$M
-    #           FOREIGN KEY (METHOD_AC)
-    #           REFERENCES INTERPRO.METHOD (METHOD_AC)
-    #     )
-    #     """
-    # )
-
     cur.execute(
         """
         CREATE TABLE INTERPRO.METHOD_SET
@@ -138,7 +123,13 @@ def init_tables(uri):
             DBCODE CHAR(1) NOT NULL,
             SET_AC VARCHAR2(25),
             SEQUENCE CLOB NOT NULL,
-            CONSTRAINT PK_METHOD_SET PRIMARY KEY (METHOD_AC)
+            CONSTRAINT PK_METHOD_SET PRIMARY KEY (METHOD_AC),
+            CONSTRAINT FK_METHOD_SET$M
+              FOREIGN KEY (METHOD_AC)
+              REFERENCES INTERPRO.METHOD (METHOD_AC),
+            CONSTRAINT FK_METHOD_SET$D
+              FOREIGN KEY (DBCODE)
+              REFERENCES INTERPRO.CV_DATABASE (DBCODE)
         )
         """
     )
@@ -157,35 +148,22 @@ def init_tables(uri):
         """
     )
 
-    # cur.execute(
-    #     """
-    #     CREATE TABLE INTERPRO.METHOD_TARGET
-    #     (
-    #         METHOD_AC VARCHAR2(25) NOT NULL,
-    #         TARGET_AC VARCHAR2(25) NOT NULL,
-    #         EVALUE BINARY_DOUBLE NOT NULL,
-    #         DOMAINS CLOB NOT NULL,
-    #         CONSTRAINT PK_METHOD_TARGET PRIMARY KEY (METHOD_AC, TARGET_AC),
-    #         CONSTRAINT FK_METHOD_TARGET$M
-    #           FOREIGN KEY (METHOD_AC)
-    #           REFERENCES INTERPRO.METHOD (METHOD_AC),
-    #         CONSTRAINT FK_METHOD_TARGET$T
-    #           FOREIGN KEY (TARGET_AC)
-    #           REFERENCES INTERPRO.METHOD (METHOD_AC)
-    #     )
-    #     """
-    # )
-
     cur.execute(
         """
-        CREATE TABLE INTERPRO.METHOD_SCAN
+        CREATE TABLE INTERPRO.METHOD_TARGET
         (
             QUERY_AC VARCHAR2(25) NOT NULL,
             TARGET_AC VARCHAR2(25) NOT NULL,
             EVALUE BINARY_DOUBLE NOT NULL,
             EVALUE_STR VARCHAR2(10) NOT NULL,
             DOMAINS CLOB NOT NULL,
-            CONSTRAINT PK_METHOD_SCAN PRIMARY KEY (QUERY_AC, TARGET_AC)
+            CONSTRAINT PK_METHOD_SCAN PRIMARY KEY (QUERY_AC, TARGET_AC),
+            CONSTRAINT FK_METHOD_SCAN$Q
+              FOREIGN KEY (QUERY_AC)
+              REFERENCES INTERPRO.METHOD (METHOD_AC),
+            CONSTRAINT FK_METHOD_SCAN$T
+              FOREIGN KEY (TARGET_AC)
+              REFERENCES INTERPRO.METHOD (METHOD_AC)
         )
         """
     )
