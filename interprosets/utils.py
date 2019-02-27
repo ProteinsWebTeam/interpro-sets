@@ -150,7 +150,7 @@ def init_tables(uri):
 
     cur.execute(
         """
-        CREATE TABLE INTERPRO.METHOD_TARGET
+        CREATE TABLE INTERPRO.METHOD_SCAN
         (
             QUERY_AC VARCHAR2(25) NOT NULL,
             TARGET_AC VARCHAR2(25) NOT NULL,
