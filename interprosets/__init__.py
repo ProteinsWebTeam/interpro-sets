@@ -29,11 +29,6 @@ def cli():
         "dest": "processes"
     }
 
-    parser.add_argument("--dir",
-                        help="temporary directory")
-    parser.add_argument("-p", dest="processes", type=int, default=1,
-                        help="number of processes (default: 1)")
-
     subparsers = parser.add_subparsers(dest="command")
     subparsers.required = True
     subparsers.add_parser("init", help="(re)create tables")
