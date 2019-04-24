@@ -161,11 +161,11 @@ svg .domain:hover {
 
 svg .domain text {
     font: 10px sans-serif;
-    opacity: 0;
+    fill-opacity: 0;
 }
 
 svg .domain:hover text {
-    opacity: 1;
+    fill-opacity: 1;
 }
 
 svg .labels text {
