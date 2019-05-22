@@ -193,7 +193,7 @@ def mk_compass_db(files_list, profile_db):
 
 
 def parse_compass_results(out_file):
-    p1 = re.compile(r"length\s*=\s*(\d+)")
+    # p1 = re.compile(r"length\s*=\s*(\d+)")
     p2 = re.compile(r"Evalue\s*=\s*([\d.e\-]+)")
 
     targets = {}
@@ -226,7 +226,7 @@ def parse_compass_results(out_file):
                     "evaluestr": evalue_str,
                     "length": length,
                     "start": pos_start,
-                    "end": pos_start + length - 1,
+                    "end": pos_start + len(query_seq.replace('=', '')) - 1,
                     "sequences": {
                         "query": query_seq,
                         "target": target_seq
@@ -239,7 +239,7 @@ def parse_compass_results(out_file):
             target_seq = None
 
             line = next(it)
-            length = int(p1.match(line).group(1))
+            # length = int(p1.match(line).group(1))
 
             line = next(it)
             evalue_str = p2.search(line).group(1)
@@ -289,7 +289,7 @@ def parse_compass_results(out_file):
         "evaluestr": evalue_str,
         "length": length,
         "start": pos_start,
-        "end": pos_start + length - 1,
+        "end": pos_start + len(query_seq.replace('=', '')) - 1,
         "sequences": {
             "query": query_seq,
             "target": target_seq
