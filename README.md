@@ -107,9 +107,10 @@ gunicorn interprosets.server:app
 
 ## Resource usage
 
-| command   | families | threads     | memory usage | disk usage | Time     |
-|-----------|---------:|------------:|-------------:|-----------:|---------:|
-| pirsf     |     3283 |           8 |         2 GB |       2 GB |     15 m |
-| pfam      |    17929 |           8 |         3 GB |       5 GB |      1 h |
-| cdd       |    12774 |           8 |         1 GB |     1.5 GB |     30 h |
-| panther   |    90742 |           8 |        32 GB |     105 GB |    100 h |
+| database     | families | threads     | memory usage | disk usage | Time     |
+|--------------|---------:|------------:|-------------:|-----------:|---------:|
+| cdd 3.17     |    14877 |          16 |         1 GB |     1.5 GB |     12 h |
+| panther 14.1 |    90742 |           8 |        32 GB |     105 GB |    100 h |
+| pfam 32.0    |    17929 |           8 |         3 GB |       5 GB |      1 h |
+| pirsf 3.02   |     3283 |           8 |         2 GB |       2 GB |     15 m |
+
